@@ -12,7 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE_PATH = BASE_DIR / "zenit.db"
+DATABASE_PATH = Path(os.environ.get("ZENIT_DATABASE_PATH", str(BASE_DIR / "zenit.db"))).resolve()
 SECRET_KEY = os.environ.get("ZENIT_SECRET_KEY", "zenit-dev-secret-key")
 ADMIN_USERNAME = "Zenit"
 ADMIN_PASSWORD = "Qwerty78"
@@ -32,6 +32,7 @@ app.config["SECRET_KEY"] = SECRET_KEY
 
 def get_db() -> sqlite3.Connection:
     if "db" not in g:
+        DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
         g.db = sqlite3.connect(DATABASE_PATH)
         g.db.row_factory = sqlite3.Row
     return g.db
@@ -242,6 +243,18 @@ def serve_static(path: str) -> Any:
 @app.get("/api/bootstrap")
 def api_bootstrap() -> Any:
     return jsonify(get_bootstrap_payload())
+
+
+@app.get("/health")
+def healthcheck() -> Any:
+    return jsonify(
+        {
+            "ok": True,
+            "databasePath": str(DATABASE_PATH),
+            "products": len(get_all_products()),
+            "brands": len(get_all_brands()),
+        }
+    )
 
 
 @app.post("/api/migrate")
@@ -575,4 +588,5 @@ def api_patch_order_status(order_id: str) -> Any:
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1", host="0.0.0.0", port=port)
