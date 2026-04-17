@@ -1,0 +1,13 @@
+Per usare davvero login, admin, ordini e salvataggio prodotti:
+
+1. Apri questa cartella.
+2. Fai doppio click su `start-zenit.bat`.
+3. Il sito si aprira su `http://127.0.0.1:5000`.
+
+Importante:
+- Non aprire `index.html` o `admin-login.html` con doppio click diretto.
+- Se il sito viene aperto come file locale o su hosting solo statico, il backend non puo funzionare.
+
+Credenziali admin:
+- Username: Zenit
+- Password: Qwerty78

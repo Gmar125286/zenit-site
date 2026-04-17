@@ -72,6 +72,9 @@ let users = loadUsers();
 let orders = loadOrders();
 let activeCategory = getInitialCategory();
 let query = "";
+let currentUser = null;
+let adminAuthenticated = false;
+let backendReady = false;
 let assistantConversationState = {
   lastIntent: null,
   lastSector: null,
@@ -84,15 +87,11 @@ let assistantConversationState = {
 };
 
 function isAdminAuthenticated() {
-  return sessionStorage.getItem(ADMIN_AUTH_KEY) === "true";
+  return adminAuthenticated;
 }
 
 function setAdminAuthenticated(value) {
-  if (value) {
-    sessionStorage.setItem(ADMIN_AUTH_KEY, "true");
-  } else {
-    sessionStorage.removeItem(ADMIN_AUTH_KEY);
-  }
+  adminAuthenticated = Boolean(value);
 }
 
 function getInitialCategory() {
@@ -121,19 +120,11 @@ function normalizeBrand(brand) {
 }
 
 function loadProducts() {
-  try {
-    return JSON.parse(localStorage.getItem(PRODUCTS_KEY) || "[]").map(normalizeProduct);
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function loadBrands() {
-  try {
-    return JSON.parse(localStorage.getItem(BRANDS_KEY) || "[]").map(normalizeBrand).filter((brand) => brand.name);
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function loadCart() {
@@ -145,30 +136,19 @@ function loadCart() {
 }
 
 function loadUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function loadOrders() {
-  try {
-    return JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]").map((order) => ({
-      ...order,
-      status: ORDER_STATUSES.includes(order.status) ? order.status : "Richiesta inviata"
-    }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function saveProducts() {
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+  return;
 }
 
 function saveBrands() {
-  localStorage.setItem(BRANDS_KEY, JSON.stringify(brands));
+  return;
 }
 
 function saveCart() {
@@ -176,11 +156,11 @@ function saveCart() {
 }
 
 function saveUsers() {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  return;
 }
 
 function saveOrders() {
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  return;
 }
 
 function normalizeEmail(value) {
@@ -188,19 +168,11 @@ function normalizeEmail(value) {
 }
 
 function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem(USER_AUTH_KEY) || "null");
-  } catch {
-    return null;
-  }
+  return currentUser;
 }
 
 function setCurrentUser(user) {
-  if (user) {
-    localStorage.setItem(USER_AUTH_KEY, JSON.stringify(user));
-  } else {
-    localStorage.removeItem(USER_AUTH_KEY);
-  }
+  currentUser = user || null;
   renderUserSession();
 }
 
@@ -223,6 +195,111 @@ function isAssistantWebModeEnabled() {
 function setAssistantWebModeEnabled(value) {
   localStorage.setItem(ASSISTANT_WEB_MODE_KEY, value ? "true" : "false");
   syncAssistantAdminState();
+}
+
+function getBackendAccessMessage() {
+  if (window.location.protocol === "file:") {
+    return "Per usare login, catalogo admin e ordini devi aprire il sito tramite il server locale Zenit, non come file HTML diretto.";
+  }
+  return "Il backend Zenit non risponde. Avvia il server locale e ricarica la pagina.";
+}
+
+function notifyBackendUnavailable(context = "general") {
+  backendReady = false;
+  const message = getBackendAccessMessage();
+
+  if (context === "admin-login") {
+    setAdminLoginFeedback(message, true);
+  } else if (context === "user-login") {
+    setUserAuthFeedback(userLoginMessage, message, true);
+  } else if (context === "user-register") {
+    setUserAuthFeedback(userRegisterMessage, message, true);
+  } else {
+    window.alert(message);
+  }
+}
+
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  let payload = {};
+  try {
+    payload = await response.json();
+  } catch {
+    payload = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Richiesta server non riuscita.");
+  }
+
+  return payload;
+}
+
+function getLegacyItems(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function getLegacyMigrationPayload() {
+  return {
+    users: getLegacyItems(USERS_KEY),
+    products: getLegacyItems(PRODUCTS_KEY),
+    brands: getLegacyItems(BRANDS_KEY),
+    orders: getLegacyItems(ORDERS_KEY)
+  };
+}
+
+function hasLegacyData(payload) {
+  return Object.values(payload).some((items) => Array.isArray(items) && items.length > 0);
+}
+
+function clearLegacyServerData() {
+  localStorage.removeItem(PRODUCTS_KEY);
+  localStorage.removeItem(BRANDS_KEY);
+  localStorage.removeItem(USERS_KEY);
+  localStorage.removeItem(ORDERS_KEY);
+}
+
+function applyServerState(payload = {}) {
+  products = (payload.products || []).map(normalizeProduct);
+  brands = (payload.brands || []).map(normalizeBrand).filter((brand) => brand.name);
+  orders = (payload.orders || []).map((order) => ({
+    ...order,
+    status: ORDER_STATUSES.includes(order.status) ? order.status : "Richiesta inviata"
+  }));
+  currentUser = payload.currentUser || null;
+  adminAuthenticated = Boolean(payload.isAdmin);
+  renderUserSession();
+  refreshAll();
+  syncAssistantAdminState();
+}
+
+async function bootstrapApp() {
+  const legacyPayload = getLegacyMigrationPayload();
+  let payload = await apiFetch("/api/bootstrap", { method: "GET", headers: {} });
+
+  const backendEmpty = !payload.products?.length && !payload.brands?.length && !payload.orders?.length;
+  if (backendEmpty && hasLegacyData(legacyPayload)) {
+    payload = await apiFetch("/api/migrate", {
+      method: "POST",
+      body: JSON.stringify(legacyPayload)
+    });
+    clearLegacyServerData();
+  }
+
+  applyServerState(payload);
+  backendReady = true;
 }
 
 function formatPrice(value) {
@@ -258,10 +335,19 @@ function renderUserSession() {
   `;
 
   userSession.querySelector("#user-logout")?.addEventListener("click", () => {
-    setCurrentUser(null);
-    if (currentPage === "auth") {
-      window.location.href = "index.html";
-    }
+    apiFetch("/api/auth/logout", {
+      method: "POST",
+      body: JSON.stringify({})
+    })
+      .catch(() => null)
+      .finally(() => {
+        setCurrentUser(null);
+        if (currentPage === "auth" || currentPage === "orders") {
+          window.location.href = "index.html";
+        } else {
+          refreshAll();
+        }
+      });
   });
 }
 
@@ -627,13 +713,10 @@ function createOrderFromCart() {
     userName: currentUser?.name || "Utente ospite",
     userEmail: currentUser?.email || ""
   };
-
-  orders.unshift(order);
-  saveOrders();
   return order;
 }
 
-function startCartCheckout() {
+async function startCartCheckout() {
   const currentUser = getCurrentUser();
   if (!currentUser) {
     const returnTarget = `${window.location.pathname.split("/").pop() || "index.html"}${window.location.search || ""}${window.location.hash || ""}`;
@@ -648,7 +731,12 @@ function startCartCheckout() {
     return;
   }
 
-  createOrderFromCart();
+  const order = createOrderFromCart();
+  await apiFetch("/api/orders", {
+    method: "POST",
+    body: JSON.stringify(order)
+  });
+  await bootstrapApp();
   cart = [];
   saveCart();
   renderCart();
@@ -760,11 +848,12 @@ function renderAdminOrders() {
     .join("");
 }
 
-function updateOrderStatus(orderId, nextStatus) {
-  orders = orders.map((order) => (order.id === orderId ? { ...order, status: nextStatus } : order));
-  saveOrders();
-  renderOrdersPage();
-  renderAdminOrders();
+async function updateOrderStatus(orderId, nextStatus) {
+  await apiFetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: nextStatus })
+  });
+  await bootstrapApp();
 }
 
 function renderCart() {
@@ -870,7 +959,7 @@ function setUserAuthFeedback(target, message, isError = false) {
   target.classList.toggle("is-error", isError);
 }
 
-function handleUserRegisterSubmit(event, formElement) {
+async function handleUserRegisterSubmit(event, formElement) {
   event.preventDefault();
   const formData = new FormData(formElement);
   const name = String(formData.get("name") || "").trim();
@@ -882,51 +971,51 @@ function handleUserRegisterSubmit(event, formElement) {
     return;
   }
 
-  const existingUser = users.find((user) => normalizeEmail(user.email) === email);
-  if (existingUser) {
-    setUserAuthFeedback(userRegisterMessage, "Esiste gia un account associato a questa email.", true);
-    return;
+  try {
+    await apiFetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        id: `${slugify(name)}-${Date.now()}`,
+        name,
+        email,
+        password
+      })
+    });
+    await bootstrapApp();
+    setUserAuthFeedback(userRegisterMessage, "Registrazione completata. Ora sei connesso al sito Zenit.");
+    userRegisterForm?.reset();
+    const redirectTarget = getUserRedirectTarget() || formElement?.dataset.redirect || "index.html";
+    setUserRedirectTarget(null);
+    window.setTimeout(() => {
+      window.location.href = redirectTarget;
+    }, 260);
+  } catch (error) {
+    setUserAuthFeedback(userRegisterMessage, error.message || "Registrazione non riuscita.", true);
   }
-
-  const newUser = {
-    id: `${slugify(name)}-${Date.now()}`,
-    name,
-    email,
-    password
-  };
-
-  users.unshift(newUser);
-  saveUsers();
-  setCurrentUser({ id: newUser.id, name: newUser.name, email: newUser.email });
-  setUserAuthFeedback(userRegisterMessage, "Registrazione completata. Ora sei connesso al sito Zenit.");
-  userRegisterForm?.reset();
-  const redirectTarget = getUserRedirectTarget() || formElement?.dataset.redirect || "index.html";
-  setUserRedirectTarget(null);
-  window.setTimeout(() => {
-    window.location.href = redirectTarget;
-  }, 260);
 }
 
-function handleUserLoginSubmit(event, formElement) {
+async function handleUserLoginSubmit(event, formElement) {
   event.preventDefault();
   const formData = new FormData(formElement);
   const email = normalizeEmail(formData.get("email"));
   const password = String(formData.get("password") || "");
 
-  const user = users.find((item) => normalizeEmail(item.email) === email && item.password === password);
-  if (!user) {
-    setUserAuthFeedback(userLoginMessage, "Credenziali non valide. Controlla email e password.", true);
-    return;
+  try {
+    await apiFetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+    await bootstrapApp();
+    setUserAuthFeedback(userLoginMessage, "Accesso eseguito. Ti sto riportando sul sito.");
+    userLoginForm?.reset();
+    const redirectTarget = getUserRedirectTarget() || formElement?.dataset.redirect || "index.html";
+    setUserRedirectTarget(null);
+    window.setTimeout(() => {
+      window.location.href = redirectTarget;
+    }, 260);
+  } catch (error) {
+    setUserAuthFeedback(userLoginMessage, error.message || "Credenziali non valide. Controlla email e password.", true);
   }
-
-  setCurrentUser({ id: user.id, name: user.name, email: user.email });
-  setUserAuthFeedback(userLoginMessage, "Accesso eseguito. Ti sto riportando sul sito.");
-  userLoginForm?.reset();
-  const redirectTarget = getUserRedirectTarget() || formElement?.dataset.redirect || "index.html";
-  setUserRedirectTarget(null);
-  window.setTimeout(() => {
-    window.location.href = redirectTarget;
-  }, 260);
 }
 
 function readFileAsDataUrl(file) {
@@ -973,14 +1062,20 @@ async function handleAdminSubmit(event) {
     showcase
   });
 
-  products.unshift(product);
-  saveProducts();
-  adminForm.reset();
-  const showcaseField = document.querySelector("#admin-showcase");
-  if (showcaseField) {
-    showcaseField.checked = true;
+  try {
+    await apiFetch("/api/products", {
+      method: "POST",
+      body: JSON.stringify(product)
+    });
+    await bootstrapApp();
+    adminForm.reset();
+    const showcaseField = document.querySelector("#admin-showcase");
+    if (showcaseField) {
+      showcaseField.checked = true;
+    }
+  } catch (error) {
+    window.alert(error.message || "Non sono riuscito a salvare il prodotto.");
   }
-  refreshAll();
 }
 
 async function handleBrandSubmit(event) {
@@ -1008,30 +1103,50 @@ async function handleBrandSubmit(event) {
     knowledgeUpdatedAt: new Date().toISOString()
   });
 
-  brands.unshift(brand);
-  saveBrands();
-  brandForm.reset();
-  refreshAll();
+  try {
+    await apiFetch("/api/brands", {
+      method: "POST",
+      body: JSON.stringify(brand)
+    });
+    await bootstrapApp();
+    brandForm.reset();
+  } catch (error) {
+    window.alert(error.message || "Non sono riuscito a salvare il brand.");
+  }
 }
 
-function handleDeleteProduct(id) {
-  products = products.filter((product) => product.id !== id);
-  saveProducts();
-  refreshAll();
+async function handleDeleteProduct(id) {
+  try {
+    await apiFetch(`/api/products/${encodeURIComponent(id)}`, {
+      method: "DELETE"
+    });
+    await bootstrapApp();
+  } catch (error) {
+    window.alert(error.message || "Non sono riuscito a eliminare il prodotto.");
+  }
 }
 
-function handleDeleteBrand(id) {
-  brands = brands.filter((brand) => brand.id !== id);
-  saveBrands();
-  refreshAll();
+async function handleDeleteBrand(id) {
+  try {
+    await apiFetch(`/api/brands/${encodeURIComponent(id)}`, {
+      method: "DELETE"
+    });
+    await bootstrapApp();
+  } catch (error) {
+    window.alert(error.message || "Non sono riuscito a eliminare il brand.");
+  }
 }
 
-function handleToggleShowcase(id) {
-  products = products.map((product) =>
-    product.id === id ? { ...product, showcase: !product.showcase } : product
-  );
-  saveProducts();
-  refreshAll();
+async function handleToggleShowcase(id) {
+  try {
+    await apiFetch(`/api/products/${encodeURIComponent(id)}/showcase`, {
+      method: "PATCH",
+      body: JSON.stringify({})
+    });
+    await bootstrapApp();
+  } catch (error) {
+    window.alert(error.message || "Non sono riuscito ad aggiornare la vetrina.");
+  }
 }
 
 function bindScenicCards() {
@@ -2247,14 +2362,32 @@ cartItems?.addEventListener("change", (event) => {
 });
 
 adminForm?.addEventListener("submit", (event) => {
-  if (!isAdminAuthenticated()) return;
+  if (!backendReady) {
+    event.preventDefault();
+    notifyBackendUnavailable();
+    return;
+  }
+  if (!isAdminAuthenticated()) {
+    event.preventDefault();
+    window.alert("Effettua prima il login admin per aggiungere prodotti.");
+    return;
+  }
   handleAdminSubmit(event).catch(() => {
     alert("Non sono riuscito a salvare il prodotto. Controlla i campi e riprova.");
   });
 });
 
 brandForm?.addEventListener("submit", (event) => {
-  if (!isAdminAuthenticated()) return;
+  if (!backendReady) {
+    event.preventDefault();
+    notifyBackendUnavailable();
+    return;
+  }
+  if (!isAdminAuthenticated()) {
+    event.preventDefault();
+    window.alert("Effettua prima il login admin per aggiungere brand.");
+    return;
+  }
   handleBrandSubmit(event).catch(() => {
     alert("Non sono riuscito a salvare il brand. Controlla i campi e riprova.");
   });
@@ -2288,45 +2421,78 @@ adminOrdersList?.addEventListener("change", (event) => {
   updateOrderStatus(select.dataset.orderStatus, select.value);
 });
 
-function handleAdminLoginSubmit(event, formElement) {
+async function handleAdminLoginSubmit(event, formElement) {
   event.preventDefault();
   const formData = new FormData(formElement);
   const username = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "");
 
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    setAdminAuthenticated(true);
+  try {
+    await apiFetch("/api/admin/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password })
+    });
+    await bootstrapApp();
     setAdminLoginFeedback("Accesso eseguito. L'area admin e ora sbloccata.");
     adminLoginForm?.reset();
-    syncAdminView();
     const redirectTarget = formElement?.dataset.redirect;
     if (redirectTarget) {
       window.location.href = redirectTarget;
       return;
     }
     document.querySelector("#admin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
+  } catch (error) {
+    setAdminLoginFeedback(error.message || "Credenziali non valide. Usa username Zenit e password Qwerty78.", true);
   }
-
-  setAdminLoginFeedback("Credenziali non valide. Usa username Zenit e password Qwerty78.", true);
 }
 
 adminLoginForm?.addEventListener("submit", (event) => {
-  handleAdminLoginSubmit(event, adminLoginForm);
+  if (!backendReady) {
+    event.preventDefault();
+    notifyBackendUnavailable("admin-login");
+    return;
+  }
+  handleAdminLoginSubmit(event, adminLoginForm).catch((error) => {
+    setAdminLoginFeedback(error.message || "Accesso admin non riuscito.", true);
+  });
 });
 
 userLoginForm?.addEventListener("submit", (event) => {
-  handleUserLoginSubmit(event, userLoginForm);
+  if (!backendReady) {
+    event.preventDefault();
+    notifyBackendUnavailable("user-login");
+    return;
+  }
+  handleUserLoginSubmit(event, userLoginForm).catch((error) => {
+    setUserAuthFeedback(userLoginMessage, error.message || "Accesso non riuscito.", true);
+  });
 });
 
 userRegisterForm?.addEventListener("submit", (event) => {
-  handleUserRegisterSubmit(event, userRegisterForm);
+  if (!backendReady) {
+    event.preventDefault();
+    notifyBackendUnavailable("user-register");
+    return;
+  }
+  handleUserRegisterSubmit(event, userRegisterForm).catch((error) => {
+    setUserAuthFeedback(userRegisterMessage, error.message || "Registrazione non riuscita.", true);
+  });
 });
 
-adminLogoutButton?.addEventListener("click", () => {
-  setAdminAuthenticated(false);
+adminLogoutButton?.addEventListener("click", async () => {
+  try {
+    await apiFetch("/api/admin/logout", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+  } catch {
+    // no-op: even if logout request fails we still refresh local view below
+  }
+  await bootstrapApp().catch(() => {
+    setAdminAuthenticated(false);
+    syncAdminView();
+  });
   setAdminLoginFeedback("Sessione admin chiusa. Inserisci di nuovo le credenziali per modificare il catalogo.");
-  syncAdminView();
 });
 
 cartButton?.addEventListener("click", () => toggleCart(true));
@@ -2484,8 +2650,12 @@ if ("IntersectionObserver" in window) {
   countUpElements.forEach((element) => animateCountUp(element));
 }
 
-refreshAll();
 syncScrollChrome();
-syncAssistantAdminState();
-renderUserSession();
 setAssistantOpen(false);
+bootstrapApp().catch((error) => {
+  console.error(error);
+  notifyBackendUnavailable("admin-login");
+  refreshAll();
+  syncAssistantAdminState();
+  renderUserSession();
+});
