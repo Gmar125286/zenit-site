@@ -3988,31 +3988,26 @@ body[data-page="home"] .admin-panel {
   }
 
   .catalog-nav__inner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    overflow: visible;
-    padding: 8px 0 12px;
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 10px 0;
+    scroll-snap-type: x proximity;
   }
 
   .nav-item {
-    min-width: 0;
-    width: 100%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    min-width: max-content;
+    scroll-snap-align: start;
   }
 
   .nav-dropdown {
     position: static;
     min-width: 0;
-    margin-top: 0;
+    margin-top: 12px;
     opacity: 1;
     visibility: visible;
     transform: none;
     display: none;
-    padding: 8px 0 12px;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
   }
 
   .nav-item {
@@ -4024,8 +4019,8 @@ body[data-page="home"] .admin-panel {
     width: 100%;
     justify-content: space-between;
     gap: 10px;
-    padding: 12px 2px;
-    font-size: 0.98rem;
+    padding: 10px 0;
+    font-size: 0.93rem;
   }
 
   .nav-item.is-open .nav-dropdown {
@@ -4035,11 +4030,6 @@ body[data-page="home"] .admin-panel {
   .nav-dropdown__grid,
   .nav-dropdown__grid--wide {
     grid-template-columns: 1fr;
-  }
-
-  .nav-dropdown article {
-    border-radius: 16px;
-    padding: 14px;
   }
 
   .hero__inner {
@@ -4148,7 +4138,7 @@ body[data-page="home"] .admin-panel {
   .admin-login-card,
   .footer-card,
   .order-card {
-    padding: 20px;
+    padding: 22px;
   }
 
   .admin-product-row,
@@ -4177,7 +4167,7 @@ body[data-page="home"] .admin-panel {
   }
 
   .brand-chip {
-    min-width: 0;
+    min-width: 220px;
   }
 
   .assistant-widget {
@@ -4204,66 +4194,5 @@ body[data-page="home"] .admin-panel {
   .auth-form__footer {
     flex-direction: column;
     align-items: stretch;
-  }
-}
-
-@media (max-width: 560px) {
-  .hero__inner {
-    padding: 32px 0 36px;
-    gap: 24px;
-  }
-
-  .hero-copy h1,
-  .dark-story__copy h2 {
-    font-size: clamp(1.72rem, 8.6vw, 2.05rem);
-    line-height: 1.08;
-    letter-spacing: -0.04em;
-  }
-
-  .hero-actions {
-    gap: 10px;
-  }
-
-  .hero-actions .primary-button,
-  .hero-actions .secondary-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .stats-band__inner {
-    gap: 10px;
-    padding: 14px 0;
-  }
-
-  .stats-band__inner article {
-    padding: 16px;
-  }
-
-  .section-head {
-    gap: 8px;
-    padding-bottom: 12px;
-  }
-
-  .quote-benefits {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .quote-benefits span {
-    width: 100%;
-  }
-
-  .product-card__image {
-    min-height: 180px;
-  }
-
-  .footer-card {
-    border-radius: 22px;
-    padding: 18px;
-  }
-
-  .assistant-panel {
-    border-radius: 22px;
   }
 }
