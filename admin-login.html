@@ -66,14 +66,31 @@
           </div>
 
           <div class="admin-login-card admin-login-card--page">
-            <form class="admin-login-form" id="admin-login-form">
+            <form class="admin-login-form" id="admin-login-form" autocomplete="off">
               <div class="form-field">
                 <label for="admin-username">Username</label>
-                <input id="admin-username" name="username" type="text" required placeholder="Zenit" />
+                <input
+                  id="admin-username"
+                  name="username"
+                  type="text"
+                  required
+                  placeholder="Inserisci username admin"
+                  autocomplete="off"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
+                />
               </div>
               <div class="form-field">
                 <label for="admin-password">Password</label>
-                <input id="admin-password" name="password" type="password" required placeholder="Qwerty78" />
+                <input
+                  id="admin-password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Inserisci password"
+                  autocomplete="new-password"
+                />
               </div>
               <div class="admin-login-form__footer">
                 <p id="admin-login-message">Inserisci le credenziali admin per aprire la dashboard riservata di catalogo, brand e vetrina.</p>
