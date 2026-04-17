@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>I miei ordini | Zenit Srl</title>
+    <meta
+      name="description"
+      content="Consulta lo storico delle richieste ordine inviate dal sito Zenit."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="orders">
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-progress-bar"></span>
+    </div>
+
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <div class="top-strip__group">
+          <span>099.4725984</span>
+          <span>099.4723444</span>
+          <span>commerciale@zenitsrl.it</span>
+        </div>
+        <div class="top-strip__group">
+          <span>Area clienti Zenit</span>
+          <span>Lun-Ven 08:00-16:30</span>
+          <a href="catalogo.html">Vai al catalogo</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-row">
+        <a class="logo-block" href="index.html#top" aria-label="Zenit Srl">
+          <img class="logo-image" src="zenit-logo-crop.png" alt="Logo Zenit Srl" />
+        </a>
+
+        <div class="header-cta">
+          <div class="user-session" id="user-session"></div>
+          <a href="index.html">Home</a>
+          <a class="register-button" href="catalogo.html">Catalogo</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="orders-page">
+      <section class="orders-page__hero reveal">
+        <div class="container orders-page__inner">
+          <div class="orders-page__copy">
+            <p class="section-kicker">Area ordini</p>
+            <h1>Le tue richieste ordine Zenit</h1>
+            <p id="orders-page-message">
+              Qui trovi lo storico delle richieste inviate dal carrello con il tuo account.
+            </p>
+            <div class="auth-page__badges">
+              <span id="orders-count">0 ordini</span>
+              <span>Storico richieste</span>
+              <span>Riepilogo prodotti</span>
+            </div>
+          </div>
+
+          <div class="orders-board" id="orders-list" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesso Admin | Zenit Srl</title>
+    <meta
+      name="description"
+      content="Area di accesso admin Zenit Srl per la gestione di catalogo, brand e vetrina homepage."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="admin-login">
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-progress-bar"></span>
+    </div>
+
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <div class="top-strip__group">
+          <span>099.4725984</span>
+          <span>099.4723444</span>
+          <span>commerciale@zenitsrl.it</span>
+        </div>
+        <div class="top-strip__group">
+          <span>Accesso riservato Zenit</span>
+          <span>Lun-Ven 08:00-16:30</span>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-row">
+        <a class="logo-block" href="index.html#top" aria-label="Zenit Srl">
+          <img class="logo-image" src="zenit-logo-crop.png" alt="Logo Zenit Srl" />
+        </a>
+
+        <div class="header-cta">
+          <div class="user-session" id="user-session"></div>
+          <a href="index.html">Torna al sito</a>
+          <a class="register-button" href="catalogo.html">Catalogo</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-login-page">
+      <section class="admin-login-page__hero reveal admin-login-panel" id="admin-login">
+        <div class="container admin-login-page__inner">
+          <div class="admin-login-page__copy">
+            <p class="section-kicker">Accesso admin</p>
+            <h1>Entra nella gestione riservata Zenit</h1>
+            <p>
+              Accedi per modificare catalogo, brand, vetrina homepage e contenuti gestionali del sito.
+            </p>
+            <div class="admin-login-page__badges">
+              <span>Catalogo dinamico</span>
+              <span>Brand partner</span>
+              <span>Vetrina homepage</span>
+            </div>
+          </div>
+
+          <div class="admin-login-card admin-login-card--page">
+            <form class="admin-login-form" id="admin-login-form" data-redirect="admin-login.html">
+              <div class="form-field">
+                <label for="admin-username">Username</label>
+                <input id="admin-username" name="username" type="text" required placeholder="Zenit" />
+              </div>
+              <div class="form-field">
+                <label for="admin-password">Password</label>
+                <input id="admin-password" name="password" type="password" required placeholder="Qwerty78" />
+              </div>
+              <div class="admin-login-form__footer">
+                <p id="admin-login-message">Inserisci le credenziali admin per sbloccare la gestione del catalogo.</p>
+                <button class="primary-button" type="submit">Accedi all'admin</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-orders-panel reveal admin-protected" id="admin-protected" hidden>
+        <div class="container">
+          <div class="section-head section-head--admin">
+            <div>
+              <p class="section-kicker">Ordini</p>
+              <h2>Gestione richieste ordine</h2>
+              <p>Consulta le richieste inviate dagli utenti e aggiorna il loro stato in tempo reale.</p>
+            </div>
+            <button class="ghost-button" id="admin-logout" type="button">Esci</button>
+          </div>
+
+          <div class="admin-list-card">
+            <div class="admin-list-card__head">
+              <h3>Ordini registrati</h3>
+              <span id="admin-orders-count">0 ordini</span>
+            </div>
+            <div class="admin-orders-list" id="admin-orders-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>

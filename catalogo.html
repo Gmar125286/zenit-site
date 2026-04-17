@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catalogo Zenit Srl | Tutti i Prodotti</title>
+    <meta
+      name="description"
+      content="Catalogo completo Zenit Srl: tutti i prodotti DPI, anticaduta, ATEX, spazi confinati, abbigliamento e sicurezza industriale."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="catalog">
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-progress-bar"></span>
+    </div>
+
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <div class="top-strip__group">
+          <span>099.4725984</span>
+          <span>099.4723444</span>
+          <span>commerciale@zenitsrl.it</span>
+        </div>
+        <div class="top-strip__group">
+          <span>Spedizione gratuita sopra &euro;150</span>
+          <span>Lun-Ven 08:00-16:30</span>
+          <a href="ordini.html">I miei ordini</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-row">
+        <a class="logo-block" href="index.html#top" aria-label="Zenit Srl">
+          <img class="logo-image" src="zenit-logo-crop.png" alt="Logo Zenit Srl" />
+        </a>
+
+        <label class="search-shell" aria-label="Cerca prodotti">
+          <span class="search-icon">&#8981;</span>
+          <input id="search-input" type="search" placeholder="Cerca prodotti, marca, modello, categoria..." />
+        </label>
+
+        <div class="header-cta">
+          <button class="icon-cart" id="cart-button" type="button" aria-label="Apri carrello">
+            &#128722;
+            <span id="cart-count">0</span>
+          </button>
+          <div class="user-session" id="user-session"></div>
+          <a class="ghost-button" href="admin-login.html">Admin</a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="catalog-nav">
+      <div class="container catalog-nav__inner">
+        <div class="nav-item nav-item--simple">
+          <a class="nav-trigger nav-trigger--link" href="catalogo.html">Tutti i DPI</a>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">DPI Anticaduta & Linee Vita</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Imbracature</span>
+                <a href="catalogo.html?categoria=Anticaduta">Imbracature base</a>
+                <a href="catalogo.html?categoria=Anticaduta">Imbracature professionali</a>
+                <a href="catalogo.html?categoria=Anticaduta">Kit completi</a>
+              </article>
+              <article>
+                <span>Sistemi</span>
+                <a href="catalogo.html?categoria=Anticaduta">Cordini</a>
+                <a href="catalogo.html?categoria=Anticaduta">Connettori</a>
+                <a href="catalogo.html?categoria=Anticaduta">Ancoraggi e linee vita</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Antinfortunistica</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Protezione personale</span>
+                <a href="catalogo.html?categoria=Antinfortunistica">Testa</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Vista</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Udito</a>
+              </article>
+              <article>
+                <span>Protezione operativa</span>
+                <a href="catalogo.html?categoria=Antinfortunistica">Mani</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Vie respiratorie</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Monouso</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Calzature e Abbigliamento</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Calzature</span>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">S1P</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">S3</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Alte prestazioni</a>
+              </article>
+              <article>
+                <span>Abbigliamento</span>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Alta visibilita</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Tecnico da cantiere</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Multiprotezione</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Prodotti ATEX</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Rilevazione</span>
+                <a href="catalogo.html?categoria=ATEX">Rilevatori gas</a>
+                <a href="catalogo.html?categoria=ATEX">Monitoraggio</a>
+                <a href="catalogo.html?categoria=ATEX">Accessori certificati</a>
+              </article>
+              <article>
+                <span>Ambienti Ex</span>
+                <a href="catalogo.html?categoria=ATEX">Illuminazione ATEX</a>
+                <a href="catalogo.html?categoria=ATEX">Strumentazione</a>
+                <a href="catalogo.html?categoria=ATEX">Dispositivi portatili</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Spazi Confinati</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Accesso e recupero</span>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Treppiedi e davit</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Recuperatori</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Kit evacuazione</a>
+              </article>
+              <article>
+                <span>Supporto operativo</span>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Comunicazione</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Ventilazione</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Illuminazione</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Saldatura</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Protezione saldatore</span>
+                <a href="catalogo.html?categoria=Saldatura">Maschere</a>
+                <a href="catalogo.html?categoria=Saldatura">Guanti</a>
+                <a href="catalogo.html?categoria=Saldatura">Abbigliamento</a>
+              </article>
+              <article>
+                <span>Complementi</span>
+                <a href="catalogo.html?categoria=Saldatura">Consumabili</a>
+                <a href="catalogo.html?categoria=Saldatura">Accessori</a>
+                <a href="catalogo.html?categoria=Saldatura">Protezione area lavoro</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item nav-item--simple">
+          <a class="nav-trigger nav-trigger--link" href="admin-login.html">Admin catalogo</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="top">
+      <section class="catalog-hero reveal">
+        <div class="container catalog-hero__inner">
+          <div>
+            <p class="section-kicker">Catalogo completo</p>
+            <h1>Tutti i prodotti Zenit in un'unica pagina</h1>
+            <p>
+              Qui trovi l'intero catalogo del sito. La homepage resta pulita e mostra solo i prodotti messi in vetrina.
+            </p>
+          </div>
+          <div class="catalog-hero__panel">
+            <strong id="hero-product-count">0</strong>
+            <span>prodotti totali disponibili</span>
+            <a class="outline-button" href="index.html#featured">Torna alla vetrina home</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="featured featured--catalog reveal" id="featured">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Store</p>
+              <h2>Catalogo Prodotti Zenit</h2>
+              <p>Esplora tutte le categorie, filtra i prodotti e costruisci il tuo carrello.</p>
+            </div>
+            <div class="filters" id="category-filters"></div>
+          </div>
+          <div class="product-grid" id="product-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <footer class="site-footer reveal" id="contatti">
+        <div class="container footer-grid">
+          <div class="footer-card footer-card--company">
+            <h3>Zenit Srl</h3>
+            <p>Via Tratturello Tarantino, 5 - Taranto (TA)</p>
+            <p>P.IVA / Cod. Fiscale: 02455090734</p>
+            <p><a href="tel:+390994725984">099.4725984</a> - <a href="tel:+390994723444">099.4723444</a></p>
+            <p><a href="mailto:amministrazione@zenitsrl.it">amministrazione@zenitsrl.it</a></p>
+            <p><a href="mailto:commerciale@zenitsrl.it">commerciale@zenitsrl.it</a></p>
+          </div>
+          <div class="footer-card" id="store-bottom">
+            <h3>Store</h3>
+            <div class="footer-links">
+              <a href="catalogo.html">Catalogo dinamico</a>
+              <a href="#cart-drawer" data-open-cart="true">Carrello persistente</a>
+              <a href="index.html#admin-login">Gestione admin locale</a>
+              <a href="index.html#featured">Prodotti in vetrina</a>
+            </div>
+          </div>
+          <div class="footer-card">
+            <h3>Link utili</h3>
+            <div class="footer-links">
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Codice%20Etico%20Zenit">Codice Etico</a>
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Condizioni%20Generali%20di%20Vendita%20Zenit">Condizioni Generali di Vendita</a>
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Privacy%20e%20Cookie%20Policy%20Zenit">Privacy e Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <aside class="cart-drawer" id="cart-drawer" aria-hidden="true">
+      <div class="cart-drawer__header">
+        <div><p class="section-kicker">Store</p><h2>Carrello</h2></div>
+        <button class="close-cart" id="close-cart" type="button" aria-label="Chiudi carrello">&times;</button>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-summary">
+        <div><span>Totale</span><strong id="cart-total">&euro;0,00</strong></div>
+        <button class="primary-button full-width" id="cart-checkout-button" type="button">Procedi con la richiesta ordine</button>
+      </div>
+    </aside>
+
+    <aside class="assistant-widget" id="assistant-widget" aria-live="polite">
+      <button class="assistant-toggle" id="assistant-toggle" type="button" aria-expanded="false" aria-controls="assistant-panel">
+        <span class="assistant-toggle__dot"></span>
+        <span>Carlo 2.0</span>
+      </button>
+      <div class="assistant-panel" id="assistant-panel" hidden>
+        <div class="assistant-panel__header">
+          <div class="assistant-identity">
+            <span class="assistant-avatar" aria-hidden="true">
+              <span></span>
+            </span>
+            <div>
+            <p class="section-kicker">Supporto virtuale</p>
+            <h3>Carlo 2.0, AI dedicata ai settori Zenit</h3>
+              <p class="assistant-subtitle">Consulente virtuale per chimico, petrolchimico, edile, navale, energetico, automotive e servizi.</p>
+            </div>
+          </div>
+          <button class="assistant-close" id="assistant-close" type="button" aria-label="Chiudi assistente">&times;</button>
+        </div>
+        <div class="assistant-statusbar">
+          <span class="assistant-status-pill assistant-status-pill--online">Online</span>
+          <span class="assistant-status-pill" id="assistant-status-copy">AI settoriale Zenit attiva</span>
+        </div>
+        <div class="assistant-messages" id="assistant-messages">
+          <article class="assistant-message assistant-message--bot">
+            <strong>Carlo 2.0</strong>
+            <p>Ciao, dimmi pure di cosa hai bisogno.</p>
+          </article>
+        </div>
+        <form class="assistant-form" id="assistant-form">
+          <input
+            id="assistant-input"
+            name="assistantQuestion"
+            type="text"
+            placeholder="Scrivi una domanda, ad esempio: lavoro nel navale, da dove partiamo?"
+            autocomplete="off"
+          />
+          <button type="submit" class="primary-button">Invia</button>
+        </form>
+        <div class="assistant-admin" id="assistant-admin-panel" hidden>
+          <label class="assistant-admin__toggle" for="assistant-web-mode">
+            <input id="assistant-web-mode" type="checkbox" />
+            <span>
+              <strong>Modalita ricerca web</strong>
+              <small>Quando Carlo 2.0 non trova informazioni nel sito, apre una ricerca Google in nuova scheda.</small>
+            </span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>

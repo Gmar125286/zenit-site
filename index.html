@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zenit Srl | DPI e Store B2B</title>
+    <meta
+      name="description"
+      content="Zenit Srl: DPI, anticaduta, antinfortunistica, ATEX, spazi confinati e store B2B con catalogo dinamico."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="home">
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-progress-bar"></span>
+    </div>
+
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <div class="top-strip__group">
+          <span>099.4725984</span>
+          <span>099.4723444</span>
+          <span>commerciale@zenitsrl.it</span>
+        </div>
+        <div class="top-strip__group">
+          <span>Spedizione gratuita sopra &euro;150</span>
+          <span>Lun-Ven 08:00-16:30</span>
+          <a href="ordini.html">I miei ordini</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-row">
+        <a class="logo-block" href="#top" aria-label="Zenit Srl">
+          <img class="logo-image" src="zenit-logo-crop.png" alt="Logo Zenit Srl" />
+        </a>
+
+        <label class="search-shell" aria-label="Cerca prodotti">
+          <span class="search-icon">&#8981;</span>
+          <input id="search-input" type="search" placeholder="Cerca prodotti, marca, modello, categoria..." />
+        </label>
+
+        <div class="header-cta">
+          <button class="icon-cart" id="cart-button" type="button" aria-label="Apri carrello">
+            &#128722;
+            <span id="cart-count">0</span>
+          </button>
+          <div class="user-session" id="user-session"></div>
+          <a class="ghost-button" href="admin-login.html">Admin</a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="catalog-nav">
+      <div class="container catalog-nav__inner">
+        <div class="nav-item nav-item--simple">
+          <a class="nav-trigger nav-trigger--link" href="catalogo.html">Tutti i DPI</a>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">DPI Anticaduta & Linee Vita</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Imbracature</span>
+                <a href="catalogo.html?categoria=Anticaduta">Imbracature base</a>
+                <a href="catalogo.html?categoria=Anticaduta">Imbracature professionali</a>
+                <a href="catalogo.html?categoria=Anticaduta">Kit completi</a>
+              </article>
+              <article>
+                <span>Sistemi</span>
+                <a href="catalogo.html?categoria=Anticaduta">Cordini</a>
+                <a href="catalogo.html?categoria=Anticaduta">Connettori</a>
+                <a href="catalogo.html?categoria=Anticaduta">Ancoraggi e linee vita</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Antinfortunistica</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Protezione personale</span>
+                <a href="catalogo.html?categoria=Antinfortunistica">Testa</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Vista</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Udito</a>
+              </article>
+              <article>
+                <span>Protezione operativa</span>
+                <a href="catalogo.html?categoria=Antinfortunistica">Mani</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Vie respiratorie</a>
+                <a href="catalogo.html?categoria=Antinfortunistica">Monouso</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Calzature e Abbigliamento</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Calzature</span>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">S1P</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">S3</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Alte prestazioni</a>
+              </article>
+              <article>
+                <span>Abbigliamento</span>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Alta visibilita</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Tecnico da cantiere</a>
+                <a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Multiprotezione</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Prodotti ATEX</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Rilevazione</span>
+                <a href="catalogo.html?categoria=ATEX">Rilevatori gas</a>
+                <a href="catalogo.html?categoria=ATEX">Monitoraggio</a>
+                <a href="catalogo.html?categoria=ATEX">Accessori certificati</a>
+              </article>
+              <article>
+                <span>Ambienti Ex</span>
+                <a href="catalogo.html?categoria=ATEX">Illuminazione ATEX</a>
+                <a href="catalogo.html?categoria=ATEX">Strumentazione</a>
+                <a href="catalogo.html?categoria=ATEX">Dispositivi portatili</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Spazi Confinati</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Accesso e recupero</span>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Treppiedi e davit</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Recuperatori</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Kit evacuazione</a>
+              </article>
+              <article>
+                <span>Supporto operativo</span>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Comunicazione</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Ventilazione</a>
+                <a href="catalogo.html?categoria=Spazi%20Confinati">Illuminazione</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-trigger" type="button">Saldatura</button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown__grid">
+              <article>
+                <span>Protezione saldatore</span>
+                <a href="catalogo.html?categoria=Saldatura">Maschere</a>
+                <a href="catalogo.html?categoria=Saldatura">Guanti</a>
+                <a href="catalogo.html?categoria=Saldatura">Abbigliamento</a>
+              </article>
+              <article>
+                <span>Complementi</span>
+                <a href="catalogo.html?categoria=Saldatura">Consumabili</a>
+                <a href="catalogo.html?categoria=Saldatura">Accessori</a>
+                <a href="catalogo.html?categoria=Saldatura">Protezione area lavoro</a>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item nav-item--simple">
+          <a class="nav-trigger nav-trigger--link" href="admin-login.html">Admin catalogo</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="top">
+      <section class="hero reveal">
+        <div class="container hero__inner">
+          <div class="hero-copy">
+            <span class="pill">ZENIT S.R.L. - SICUREZZA CHE ISPIRA FIDUCIA</span>
+            <h1>
+              LA SICUREZZA
+              <span>DIVENTA UN VANTAGGIO OPERATIVO</span>
+            </h1>
+            <p>
+              Zenit aiuta aziende, cantieri e realta industriali a lavorare meglio con DPI, consulenza,
+              affidabilita commerciale e una presenza concreta al fianco di chi ogni giorno non puo permettersi errori.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-button" href="#why-zenit">Perche scegliere Zenit</a>
+              <a class="secondary-button" href="#preventivo">Richiedi un preventivo</a>
+            </div>
+            <div class="cert-pill-row">
+              <span>EN ISO 9001:2015</span>
+              <span>EN ISO 45001:2018</span>
+              <span>SA 8000:2014</span>
+              <span>DPI Marcati CE</span>
+            </div>
+          </div>
+
+          <div class="hero-showcase">
+            <div class="hero-orbit" aria-hidden="true">
+              <span>Consulenza tecnica</span>
+              <span>Fornitura continua</span>
+              <span>Supporto rapido</span>
+            </div>
+            <article class="highlight-card">
+              <span class="badge">Catalogo dinamico</span>
+              <div class="highlight-card__placeholder">
+                <strong id="hero-product-count">0</strong>
+                <span>prodotti pubblicati</span>
+              </div>
+              <div class="highlight-card__footer">
+                <span>Gestione catalogo</span>
+                <strong>I prodotti inseriti dall'admin compariranno automaticamente nello store</strong>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-band reveal">
+        <div class="container stats-band__inner">
+          <article><strong>20+</strong><span>Anni di esperienza sul campo</span></article>
+          <article><strong>3</strong><span>Standard certificativi pubblicati</span></article>
+          <article><strong>7</strong><span>Settori industriali serviti</span></article>
+          <article><strong>1</strong><span>Un solo partner per acquisto e supporto</span></article>
+        </div>
+      </section>
+
+      <section class="dark-story reveal" id="chi-siamo">
+        <div class="container dark-story__inner">
+          <div class="dark-story__copy">
+            <p class="section-kicker">Chi siamo</p>
+            <span class="story-badge">Taranto • Industria • Affidabilita certificata</span>
+            <h2>Il tuo partner<br />per la sicurezza<br /><span>da oltre 20 anni</span></h2>
+            <p>
+              Societa tarantina specializzata nella fornitura di Dispositivi di Protezione Individuale
+              certificati CE. Operiamo al fianco di aziende industriali, cantieri, navale, automotive ed energia.
+            </p>
+            <div class="contact-mini">
+              <span>Via Tratturello Tarantino 5 - 74123 Taranto (TA)</span>
+              <span>099.4725984 - 099.4723444</span>
+              <span>commerciale@zenitsrl.it</span>
+            </div>
+            <div class="story-trust-rail" aria-label="Punti di forza Zenit">
+              <article>
+                <strong>24h</strong>
+                <span>Risposta preventivi</span>
+              </article>
+              <article>
+                <strong>CE</strong>
+                <span>DPI certificati</span>
+              </article>
+              <article>
+                <strong>B2B</strong>
+                <span>Approccio consulenziale</span>
+              </article>
+            </div>
+          </div>
+          <div class="dark-story__stats">
+            <article class="story-stat-card story-stat-card--experience">
+              <strong class="count-up" data-count="20" data-suffix="+">20+</strong>
+              <span>Esperienza sul campo</span>
+              <p>Una presenza costruita con continuita, supporto commerciale e conoscenza delle esigenze industriali reali.</p>
+              <div class="story-scroll">
+                <div class="story-scroll__track">
+                  <em>Oltre 20 anni</em>
+                  <em>Consulenza tecnica</em>
+                  <em>Supporto operativo</em>
+                  <em>Affiancamento commerciale</em>
+                  <em>Risposte rapide</em>
+                  <em>Oltre 20 anni</em>
+                  <em>Consulenza tecnica</em>
+                  <em>Supporto operativo</em>
+                </div>
+              </div>
+            </article>
+            <article class="story-stat-card story-stat-card--certs">
+              <strong class="count-up" data-count="3">3</strong>
+              <span>Certificazioni pubblicate</span>
+              <p>Standard che raccontano metodo, organizzazione e attenzione costante alla qualità del servizio.</p>
+              <div class="story-scroll">
+                <div class="story-scroll__track">
+                  <em>EN ISO 9001:2015</em>
+                  <em>EN ISO 45001:2018</em>
+                  <em>SA 8000:2014</em>
+                  <em>EN ISO 9001:2015</em>
+                  <em>EN ISO 45001:2018</em>
+                  <em>SA 8000:2014</em>
+                </div>
+              </div>
+            </article>
+            <article class="story-stat-card story-stat-card--sectors">
+              <strong class="count-up" data-count="7">7</strong>
+              <span>Settori serviti</span>
+              <p>Zenit parla con industrie diverse ma con la stessa affidabilità: capire il contesto prima di proporre.</p>
+              <div class="story-scroll">
+                <div class="story-scroll__track">
+                  <em>Chimico</em>
+                  <em>Petrolchimico</em>
+                  <em>Edile</em>
+                  <em>Energetico</em>
+                  <em>Navale</em>
+                  <em>Automotive</em>
+                  <em>Servizi</em>
+                  <em>Chimico</em>
+                  <em>Petrolchimico</em>
+                </div>
+              </div>
+            </article>
+            <article class="story-stat-card story-stat-card--families">
+              <strong class="count-up" data-count="6">6</strong>
+              <span>Famiglie prodotto</span>
+              <p>Un’offerta completa che copre protezione, comfort, continuità di fornitura e ambienti complessi.</p>
+              <div class="story-scroll">
+                <div class="story-scroll__track">
+                  <em>Anticaduta</em>
+                  <em>Antinfortunistica</em>
+                  <em>Calzature</em>
+                  <em>ATEX</em>
+                  <em>Spazi confinati</em>
+                  <em>Saldatura</em>
+                  <em>Anticaduta</em>
+                  <em>Antinfortunistica</em>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="love-grid reveal" id="why-zenit">
+        <div class="container">
+          <div class="section-head section-head--stacked">
+            <div>
+              <p class="section-kicker">Perche Zenit</p>
+              <h2>Non vende solo prodotti: mette ordine, affidabilita e serenita nei processi di acquisto</h2>
+              <p>Questa e la differenza che un responsabile acquisti, un HSE o un capocantiere percepisce subito.</p>
+            </div>
+          </div>
+          <div class="love-grid__cards">
+            <article class="love-card love-card--emerald">
+              <span>01</span>
+              <h3>Parla il linguaggio dell'industria</h3>
+              <p>Zenit conosce contesti produttivi reali, esigenze di cantiere, forniture tecniche e ritmi operativi che non possono rallentare.</p>
+            </article>
+            <article class="love-card love-card--ice">
+              <span>02</span>
+              <h3>Trasforma la complessita in scelte chiare</h3>
+              <p>Tra normative, categorie DPI, certificazioni e urgenze, il valore vero e guidare il cliente verso la soluzione giusta.</p>
+            </article>
+            <article class="love-card love-card--amber">
+              <span>03</span>
+              <h3>Rende l'acquisto piu sicuro, piu veloce, piu umano</h3>
+              <p>Dallo store al preventivo, tutto deve far percepire affidabilita, vicinanza e cura professionale.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="areas reveal" id="aree">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Catalogo DPI</p>
+              <h2>Le Nostre Aree DPI</h2>
+              <p>Soluzioni certificate per ogni esigenza di sicurezza sul lavoro</p>
+            </div>
+            <a class="outline-button" href="catalogo.html">Tutto il catalogo</a>
+          </div>
+          <div class="areas-grid">
+            <article class="area-card tone-blue"><span>01</span><h3>DPI Anticaduta & Linee Vita</h3><p>Imbracature, cordini, sistemi, EN 361 / EN 795</p><a href="catalogo.html?categoria=Anticaduta">Scopri</a></article>
+            <article class="area-card tone-purple"><span>02</span><h3>Antinfortunistica</h3><p>Udito, mani, testa, vista, vie respiratorie</p><a href="catalogo.html?categoria=Antinfortunistica">Scopri</a></article>
+            <article class="area-card tone-green"><span>03</span><h3>Calzature e Abbigliamento</h3><p>S1P/S3, alta visibilita, monouso</p><a href="catalogo.html?categoria=Calzature%20e%20Abbigliamento">Scopri</a></article>
+            <article class="area-card tone-amber"><span>04</span><h3>Prodotti ATEX</h3><p>Zone Ex, direttiva 2014/34/UE, certificati</p><a href="catalogo.html?categoria=ATEX">Scopri</a></article>
+            <article class="area-card tone-slate"><span>05</span><h3>Spazi Confinati</h3><p>Rilevatori gas, comunicazione, illuminazione</p><a href="catalogo.html?categoria=Spazi%20Confinati">Scopri</a></article>
+            <article class="area-card tone-rose"><span>06</span><h3>Saldatura</h3><p>Maschere, guanti, abbigliamento, EN 175</p><a href="catalogo.html?categoria=Saldatura">Scopri</a></article>
+            <article class="area-card tone-cyan"><span>07</span><h3>Sicurezza Ambientale</h3><p>Antinquinamento e soluzioni ambientali</p><a href="catalogo.html">Scopri</a></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="brands-strip reveal">
+        <div class="container">
+          <div class="section-head section-head--stacked brands-head">
+            <div>
+              <p class="section-kicker">Brand partner</p>
+              <h2>I marchi che accompagnano l'offerta Zenit</h2>
+              <p>Una selezione di brand professionali per sicurezza, continuita di fornitura e affidabilita tecnica.</p>
+            </div>
+          </div>
+        </div>
+        <div class="brands-marquee" aria-label="Brand partner Zenit">
+          <div class="brands-track" id="brands-track"></div>
+        </div>
+      </section>
+
+      <section class="method-strip reveal">
+        <div class="container method-strip__inner">
+          <article>
+            <span>Ascolto</span>
+            <strong>Analisi del bisogno reale</strong>
+            <p>Prima di vendere, Zenit capisce dove lavori, con quali rischi e con quali priorita operative.</p>
+          </article>
+          <article>
+            <span>Selezione</span>
+            <strong>Prodotti coerenti con il contesto</strong>
+            <p>Ogni proposta unisce requisiti tecnici, comfort, durata e praticita d'uso in cantiere o in impianto.</p>
+          </article>
+          <article>
+            <span>Continuita</span>
+            <strong>Supporto che non sparisce dopo l'ordine</strong>
+            <p>Il rapporto non finisce con la vendita: conta la continuita di fornitura e la qualita della risposta.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="featured reveal" id="featured">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Vetrina</p>
+              <h2>Prodotti in evidenza</h2>
+              <p>In homepage compaiono solo i prodotti selezionati come vetrina. L'intero assortimento vive nel catalogo completo.</p>
+            </div>
+          </div>
+          <div class="product-grid" id="product-grid" aria-live="polite"></div>
+          <div class="featured-cta">
+            <a class="primary-button large" href="catalogo.html">Vai al catalogo completo</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="sectors reveal" id="settori">
+        <div class="container">
+          <div class="sectors-head">
+            <p class="section-kicker">Settori</p>
+            <h2>Settori che Serviamo</h2>
+            <p>Zenit entra in scenari diversi, ma con la stessa promessa: proteggere il lavoro senza complicarlo.</p>
+          </div>
+          <div class="sectors-grid">
+            <article><strong>Chimico & Petrolchimico</strong></article>
+            <article><strong>Edile & Costruzioni</strong></article>
+            <article><strong>Energetico</strong></article>
+            <article><strong>Navale & Marittimo</strong></article>
+            <article><strong>Automotive & Trasporti</strong></article>
+            <article><strong>Servizi & Facility</strong></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="quote-panel reveal" id="preventivo">
+        <div class="container quote-panel__inner">
+          <div class="quote-panel__copy">
+            <p class="section-kicker">Preventivi</p>
+            <h2>Preventivi rapidi per forniture tecniche, cantieri e acquisti industriali</h2>
+            <p>
+              Inviaci il fabbisogno operativo e ti ricontattiamo con proposta, disponibilita e supporto
+              tecnico. La sezione riprende il tono premium del resto della pagina.
+            </p>
+            <div class="quote-benefits">
+              <span>Risposta commerciale dedicata</span>
+              <span>Supporto tecnico dedicato</span>
+              <span>Forniture ricorrenti e personalizzate</span>
+            </div>
+          </div>
+          <form class="quote-form quote-form--card">
+            <div class="form-field full-span">
+              <label for="quote-name">Nome e cognome</label>
+              <input id="quote-name" type="text" placeholder="Mario Rossi" aria-label="Nome e cognome" />
+            </div>
+            <div class="form-field">
+              <label for="quote-email">Email aziendale</label>
+              <input id="quote-email" type="email" placeholder="ufficio@azienda.it" aria-label="Email aziendale" />
+            </div>
+            <div class="form-field">
+              <label for="quote-company">Azienda</label>
+              <input id="quote-company" type="text" placeholder="Zenit Partner S.p.A." aria-label="Azienda" />
+            </div>
+            <div class="form-field full-span">
+              <label for="quote-request">Di cosa hai bisogno?</label>
+              <textarea id="quote-request" placeholder="Descrivi prodotti, quantita, settore e tempistiche"></textarea>
+            </div>
+            <div class="quote-form__footer full-span">
+              <p>Preventivi per DPI, ATEX, spazi confinati, abbigliamento e forniture continuative.</p>
+              <button class="primary-button" type="button">Invia richiesta</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="admin-panel reveal" id="admin">
+        <div class="container admin-panel__inner">
+          <div class="admin-login-panel" id="admin-login">
+            <div class="section-head section-head--admin">
+              <div>
+                <p class="section-kicker">Accesso admin</p>
+                <h2>Apri la scheda admin riservata</h2>
+                <p>Solo l'admin può creare, aggiornare o rimuovere i prodotti del catalogo pubblico.</p>
+              </div>
+            </div>
+            <div class="admin-access-card">
+              <a class="primary-button" href="admin-login.html">Apri login admin</a>
+            </div>
+            <div class="admin-login-card" id="admin-login-card" hidden>
+              <form class="admin-login-form" id="admin-login-form">
+                <div class="form-field">
+                  <label for="admin-username">Username</label>
+                  <input id="admin-username" name="username" type="text" required placeholder="Zenit" />
+                </div>
+                <div class="form-field">
+                  <label for="admin-password">Password</label>
+                  <input id="admin-password" name="password" type="password" required placeholder="Qwerty78" />
+                </div>
+                <div class="admin-login-form__footer">
+                  <p id="admin-login-message">Inserisci le credenziali admin per sbloccare la gestione del catalogo.</p>
+                  <button class="primary-button" type="submit">Accedi all'admin</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="admin-protected" id="admin-protected" hidden>
+            <div class="section-head section-head--admin">
+              <div>
+                <p class="section-kicker">Admin</p>
+                <h2>Gestione Catalogo</h2>
+                <p>Aggiungi prodotti personalizzati del sito e falli comparire automaticamente nel catalogo pubblico.</p>
+              </div>
+              <button class="ghost-button" id="admin-logout" type="button">Esci</button>
+            </div>
+            <div class="admin-grid">
+              <div class="admin-column">
+                <form class="admin-form" id="admin-form">
+                  <div class="form-field">
+                    <label for="admin-name">Nome prodotto</label>
+                    <input id="admin-name" name="name" type="text" required placeholder="Imbracatura anticaduta X-Pro" />
+                  </div>
+                  <div class="form-field">
+                    <label for="admin-category">Categoria</label>
+                    <input id="admin-category" name="category" type="text" required placeholder="Anticaduta" />
+                  </div>
+                  <div class="form-field">
+                    <label for="admin-brand">Brand</label>
+                    <input id="admin-brand" name="brand" type="text" required placeholder="IRUDEK" />
+                  </div>
+                  <div class="form-field">
+                    <label for="admin-subtitle">Sottotitolo</label>
+                    <input id="admin-subtitle" name="subtitle" type="text" placeholder="Imbracatura professionale" />
+                  </div>
+                  <div class="form-field">
+                    <label for="admin-price">Prezzo (&euro;)</label>
+                    <input id="admin-price" name="price" type="number" min="0" step="0.01" required placeholder="129" />
+                  </div>
+                  <div class="form-field">
+                    <label for="admin-tags">Tag</label>
+                    <input id="admin-tags" name="tags" type="text" placeholder="EN 361, TOP, ATEX" />
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="admin-description">Descrizione</label>
+                    <textarea id="admin-description" name="description" placeholder="Caratteristiche, certificazioni, note tecniche"></textarea>
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="admin-image">URL immagine</label>
+                    <input id="admin-image" name="image" type="url" placeholder="https://..." />
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="admin-image-file">Oppure carica immagine</label>
+                    <input id="admin-image-file" name="imageFile" type="file" accept="image/*" />
+                  </div>
+                  <label class="admin-checkbox full-span" for="admin-showcase">
+                    <input id="admin-showcase" name="showcase" type="checkbox" checked />
+                    <span>Mostra questo prodotto nella vetrina della homepage</span>
+                  </label>
+                  <div class="admin-form__footer full-span">
+                    <p>I prodotti vengono salvati nel browser. Puoi decidere se mostrarli solo nel catalogo completo oppure anche nella vetrina della home.</p>
+                    <button class="primary-button" type="submit">Aggiungi prodotto</button>
+                  </div>
+                </form>
+
+                <div class="admin-list-card">
+                  <div class="admin-list-card__head">
+                    <h3>Prodotti inseriti</h3>
+                    <span id="admin-product-count">0 prodotti</span>
+                  </div>
+                  <div class="admin-product-list" id="admin-product-list"></div>
+                </div>
+              </div>
+
+              <div class="admin-column">
+                <form class="admin-form admin-form--brand" id="brand-form">
+                  <div class="form-field">
+                    <label for="brand-name">Nome brand</label>
+                    <input id="brand-name" name="brandName" type="text" required placeholder="IRUDEK" />
+                  </div>
+                  <div class="form-field">
+                    <label for="brand-label">Descrizione breve</label>
+                    <input id="brand-label" name="brandLabel" type="text" placeholder="Anticaduta professionale" />
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="brand-website">Sito ufficiale brand</label>
+                    <input id="brand-website" name="brandWebsite" type="url" placeholder="https://www.brand.com" />
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="brand-notes">Note conoscitive per Carlo 2.0</label>
+                    <textarea
+                      id="brand-notes"
+                      name="brandNotes"
+                      placeholder="Inserisci qui informazioni importanti trovate sul web: specializzazione, categorie forti, certificazioni, settori serviti..."
+                    ></textarea>
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="brand-logo">URL logo brand</label>
+                    <input id="brand-logo" name="brandLogo" type="url" placeholder="https://..." />
+                  </div>
+                  <div class="form-field full-span">
+                    <label for="brand-logo-file">Oppure carica logo brand</label>
+                    <input id="brand-logo-file" name="brandLogoFile" type="file" accept="image/*" />
+                  </div>
+                  <div class="admin-form__footer full-span">
+                    <p>I brand aggiunti qui scorrono nella fascia partner della homepage con il loro logo.</p>
+                    <button class="primary-button" type="submit">Aggiungi brand</button>
+                  </div>
+                </form>
+
+                <div class="admin-list-card">
+                  <div class="admin-list-card__head">
+                    <h3>Brand inseriti</h3>
+                    <span id="brand-count">0 brand</span>
+                  </div>
+                  <div class="admin-brand-list" id="admin-brand-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer reveal" id="contatti">
+        <div class="container footer-grid">
+          <div class="footer-card footer-card--company">
+            <h3>Zenit Srl</h3>
+            <p>Via Tratturello Tarantino, 5 - Taranto (TA)</p>
+            <p>P.IVA / Cod. Fiscale: 02455090734</p>
+            <p><a href="tel:+390994725984">099.4725984</a> - <a href="tel:+390994723444">099.4723444</a></p>
+            <p><a href="mailto:amministrazione@zenitsrl.it">amministrazione@zenitsrl.it</a></p>
+            <p><a href="mailto:commerciale@zenitsrl.it">commerciale@zenitsrl.it</a></p>
+          </div>
+          <div class="footer-card" id="store-bottom">
+            <h3>Store</h3>
+            <div class="footer-links">
+              <a href="#featured">Catalogo dinamico</a>
+              <a href="#cart-drawer" data-open-cart="true">Carrello persistente</a>
+              <a href="admin-login.html">Gestione admin locale</a>
+              <a href="catalogo.html">Catalogo completo</a>
+            </div>
+          </div>
+          <div class="footer-card">
+            <h3>Link utili</h3>
+            <div class="footer-links">
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Codice%20Etico%20Zenit">Codice Etico</a>
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Condizioni%20Generali%20di%20Vendita%20Zenit">Condizioni Generali di Vendita</a>
+              <a href="mailto:commerciale@zenitsrl.it?subject=Richiesta%20Privacy%20e%20Cookie%20Policy%20Zenit">Privacy e Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <aside class="cart-drawer" id="cart-drawer" aria-hidden="true">
+      <div class="cart-drawer__header">
+        <div><p class="section-kicker">Store</p><h2>Carrello</h2></div>
+        <button class="close-cart" id="close-cart" type="button" aria-label="Chiudi carrello">&times;</button>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-summary">
+        <div><span>Totale</span><strong id="cart-total">&euro;0,00</strong></div>
+        <button class="primary-button full-width" id="cart-checkout-button" type="button">Procedi con la richiesta ordine</button>
+      </div>
+    </aside>
+
+    <aside class="assistant-widget" id="assistant-widget" aria-live="polite">
+      <button class="assistant-toggle" id="assistant-toggle" type="button" aria-expanded="false" aria-controls="assistant-panel">
+        <span class="assistant-toggle__dot"></span>
+        <span>Carlo 2.0</span>
+      </button>
+      <div class="assistant-panel" id="assistant-panel" hidden>
+        <div class="assistant-panel__header">
+          <div class="assistant-identity">
+            <span class="assistant-avatar" aria-hidden="true">
+              <span></span>
+            </span>
+            <div>
+            <p class="section-kicker">Supporto virtuale</p>
+            <h3>Carlo 2.0, AI dedicata ai settori Zenit</h3>
+              <p class="assistant-subtitle">Consulente virtuale per chimico, petrolchimico, edile, navale, energetico, automotive e servizi.</p>
+            </div>
+          </div>
+          <button class="assistant-close" id="assistant-close" type="button" aria-label="Chiudi assistente">&times;</button>
+        </div>
+        <div class="assistant-statusbar">
+          <span class="assistant-status-pill assistant-status-pill--online">Online</span>
+          <span class="assistant-status-pill" id="assistant-status-copy">AI settoriale Zenit attiva</span>
+        </div>
+        <div class="assistant-messages" id="assistant-messages">
+          <article class="assistant-message assistant-message--bot">
+            <strong>Carlo 2.0</strong>
+            <p>Ciao, dimmi pure di cosa hai bisogno.</p>
+          </article>
+        </div>
+        <form class="assistant-form" id="assistant-form">
+          <input
+            id="assistant-input"
+            name="assistantQuestion"
+            type="text"
+            placeholder="Scrivi una domanda, ad esempio: lavoro nel petrolchimico, cosa mi consigli?"
+            autocomplete="off"
+          />
+          <button type="submit" class="primary-button">Invia</button>
+        </form>
+        <div class="assistant-admin" id="assistant-admin-panel" hidden>
+          <label class="assistant-admin__toggle" for="assistant-web-mode">
+            <input id="assistant-web-mode" type="checkbox" />
+            <span>
+              <strong>Modalita ricerca web</strong>
+              <small>Quando Carlo 2.0 non trova informazioni nel sito, apre una ricerca Google in nuova scheda.</small>
+            </span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>

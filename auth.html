@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accedi o Registrati | Zenit Srl</title>
+    <meta
+      name="description"
+      content="Crea il tuo account Zenit o accedi per gestire richieste, carrello e percorso utente sul sito."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="auth">
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-progress-bar"></span>
+    </div>
+
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <div class="top-strip__group">
+          <span>099.4725984</span>
+          <span>099.4723444</span>
+          <span>commerciale@zenitsrl.it</span>
+        </div>
+        <div class="top-strip__group">
+          <span>Area clienti Zenit</span>
+          <span>Lun-Ven 08:00-16:30</span>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-row">
+        <a class="logo-block" href="index.html#top" aria-label="Zenit Srl">
+          <img class="logo-image" src="zenit-logo-crop.png" alt="Logo Zenit Srl" />
+        </a>
+
+        <div class="header-cta">
+          <div class="user-session" id="user-session"></div>
+          <a href="index.html">Torna al sito</a>
+          <a class="register-button" href="catalogo.html">Catalogo</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="auth-page">
+      <section class="auth-page__hero reveal">
+        <div class="container auth-page__inner">
+          <div class="auth-page__copy">
+            <p class="section-kicker">Area utenti</p>
+            <h1>Accedi o crea il tuo profilo Zenit</h1>
+            <p>
+              Registra il tuo account per tenere traccia del tuo percorso sul sito, preparare richieste ordine e
+              usare il carrello in modo più personale.
+            </p>
+            <div class="auth-page__badges">
+              <span>Registrazione rapida</span>
+              <span>Login utenti esterni</span>
+              <span>Esperienza personalizzata</span>
+            </div>
+          </div>
+
+          <div class="auth-card">
+            <div class="auth-card__tabs">
+              <a class="auth-tab" href="#login">Accedi</a>
+              <a class="auth-tab" href="#register">Registrati</a>
+            </div>
+
+            <section class="auth-section" id="login">
+              <h2>Hai già un account?</h2>
+              <form class="auth-form" id="user-login-form" data-redirect="index.html">
+                <div class="form-field">
+                  <label for="user-login-email">Email</label>
+                  <input id="user-login-email" name="email" type="email" required placeholder="nome@azienda.it" />
+                </div>
+                <div class="form-field">
+                  <label for="user-login-password">Password</label>
+                  <input id="user-login-password" name="password" type="password" required placeholder="Inserisci la password" />
+                </div>
+                <div class="auth-form__footer">
+                  <p id="user-login-message">Accedi con i dati che hai usato in fase di registrazione.</p>
+                  <button class="primary-button" type="submit">Accedi</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="auth-section" id="register">
+              <h2>Nuovo utente</h2>
+              <form class="auth-form" id="user-register-form" data-redirect="index.html">
+                <div class="form-field">
+                  <label for="user-register-name">Nome completo</label>
+                  <input id="user-register-name" name="name" type="text" required placeholder="Mario Rossi" />
+                </div>
+                <div class="form-field">
+                  <label for="user-register-email">Email</label>
+                  <input id="user-register-email" name="email" type="email" required placeholder="nome@azienda.it" />
+                </div>
+                <div class="form-field full-span">
+                  <label for="user-register-password">Password</label>
+                  <input id="user-register-password" name="password" type="password" required minlength="6" placeholder="Crea una password di almeno 6 caratteri" />
+                </div>
+                <div class="auth-form__footer full-span">
+                  <p id="user-register-message">Registrati per salvare il tuo profilo utente sul sito Zenit.</p>
+                  <button class="primary-button" type="submit">Crea account</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>
