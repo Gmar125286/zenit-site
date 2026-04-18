@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260418-mobileheader" />
+    <link rel="stylesheet" href="styles.css?v=20260418-admintaxonomy" />
   </head>
   <body data-page="admin-login">
     <div class="scroll-progress" aria-hidden="true">
@@ -121,7 +121,15 @@
                 </div>
                 <div class="form-field">
                   <label for="admin-category">Categoria</label>
-                  <input id="admin-category" name="category" type="text" required placeholder="Anticaduta" />
+                  <select id="admin-category" name="category" required>
+                    <option value="">Seleziona macro categoria</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="admin-subcategory">Sottocategoria</label>
+                  <select id="admin-subcategory" name="subcategory" required>
+                    <option value="">Seleziona prima una macro categoria</option>
+                  </select>
                 </div>
                 <div class="form-field">
                   <label for="admin-brand">Brand</label>
@@ -230,6 +238,6 @@
     </main>
 
     <div class="backdrop" id="backdrop" hidden></div>
-    <script src="app.js?v=20260418-mobileheader"></script>
+    <script src="app.js?v=20260418-admintaxonomy"></script>
   </body>
 </html>

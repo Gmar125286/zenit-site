@@ -66,6 +66,18 @@ const assistantSuggestions = document.querySelector("#assistant-suggestions");
 const assistantAdminPanel = document.querySelector("#assistant-admin-panel");
 const assistantWebModeToggle = document.querySelector("#assistant-web-mode");
 const assistantStatusCopy = document.querySelector("#assistant-status-copy");
+const adminCategorySelect = document.querySelector("#admin-category");
+const adminSubcategorySelect = document.querySelector("#admin-subcategory");
+
+const PRODUCT_TAXONOMY = {
+  Anticaduta: ["Imbracature base", "Imbracature professionali", "Kit completi", "Cordini", "Connettori", "Ancoraggi e linee vita"],
+  Antinfortunistica: ["Testa", "Vista", "Udito", "Mani", "Vie respiratorie", "Monouso"],
+  "Calzature e Abbigliamento": ["S1P", "S3", "Alte prestazioni", "Alta visibilita", "Tecnico da cantiere", "Multiprotezione"],
+  "Prodotti ATEX": ["Rilevatori gas", "Monitoraggio", "Accessori certificati", "Illuminazione ATEX", "Strumentazione", "Dispositivi portatili"],
+  "Spazi Confinati": ["Treppiedi e davit", "Recuperatori", "Kit evacuazione", "Comunicazione", "Ventilazione", "Illuminazione"],
+  Saldatura: ["Maschere", "Guanti", "Abbigliamento", "Consumabili", "Accessori", "Protezione area lavoro"],
+  "Soluzioni Ambientali": ["Soluzioni antinquinamento", "Gestione ambientale", "Supporto operativo"]
+};
 
 let products = loadProducts();
 let brands = loadBrands();
@@ -104,6 +116,11 @@ function getInitialCategory() {
 function normalizeProduct(product) {
   return {
     ...product,
+    category: String(product.category || "").trim(),
+    subcategory: String(product.subcategory || "").trim(),
+    brand: String(product.brand || "").trim(),
+    subtitle: String(product.subtitle || "").trim(),
+    description: String(product.description || "").trim(),
     tags: Array.isArray(product.tags) ? product.tags.filter(Boolean) : [],
     showcase: Boolean(product.showcase)
   };
@@ -401,6 +418,47 @@ function getCategories() {
   return ["Tutti", ...new Set(products.map((product) => product.category).filter(Boolean))];
 }
 
+function getTaxonomyCategories() {
+  return Object.keys(PRODUCT_TAXONOMY);
+}
+
+function populateSubcategoryOptions(category, selectedValue = "") {
+  if (!adminSubcategorySelect) return;
+
+  const microcategories = PRODUCT_TAXONOMY[category] || [];
+  const placeholder = category ? "Seleziona micro categoria" : "Seleziona prima una macro categoria";
+
+  adminSubcategorySelect.innerHTML = [
+    `<option value="">${placeholder}</option>`,
+    ...microcategories.map(
+      (microcategory) => `<option value="${microcategory}" ${microcategory === selectedValue ? "selected" : ""}>${microcategory}</option>`
+    )
+  ].join("");
+
+  adminSubcategorySelect.disabled = !category;
+}
+
+function hydrateAdminCategorySelects() {
+  if (!adminCategorySelect) return;
+
+  const currentCategory = adminCategorySelect.value || "";
+  const currentSubcategory = adminSubcategorySelect?.value || "";
+
+  adminCategorySelect.innerHTML = [
+    '<option value="">Seleziona macro categoria</option>',
+    ...getTaxonomyCategories().map(
+      (category) => `<option value="${category}" ${category === currentCategory ? "selected" : ""}>${category}</option>`
+    )
+  ].join("");
+
+  const nextCategory = PRODUCT_TAXONOMY[currentCategory] ? currentCategory : "";
+  if (nextCategory !== currentCategory) {
+    adminCategorySelect.value = "";
+  }
+
+  populateSubcategoryOptions(nextCategory, currentSubcategory);
+}
+
 function getProductById(id) {
   return products.find((product) => product.id === id);
 }
@@ -413,7 +471,7 @@ function filteredProducts(sourceProducts = products) {
   return sourceProducts.filter((product) => {
     const matchesCategory = activeCategory === "Tutti" || product.category === activeCategory;
     const haystack =
-      `${product.name} ${product.category} ${product.brand} ${product.subtitle} ${product.description} ${product.tags.join(" ")}`
+      `${product.name} ${product.category} ${product.subcategory} ${product.brand} ${product.subtitle} ${product.description} ${product.tags.join(" ")}`
         .toLowerCase();
     return matchesCategory && haystack.includes(query.toLowerCase());
   });
@@ -527,7 +585,7 @@ function renderProducts() {
           <span class="product-brand">${product.brand || "ZENIT"}</span>
           <h3>${product.name}</h3>
           <p class="product-subtitle">${product.subtitle || product.description || "Prodotto catalogo Zenit"}</p>
-          <span class="product-request">${product.category || "Catalogo"}</span>
+          <span class="product-request">${product.subcategory || product.category || "Catalogo"}</span>
           <strong class="product-price">${formatPrice(product.price || 0)}</strong>
           <div class="product-actions">
             <button class="ghost-button" type="button">${product.description ? "Info prodotto" : "Dettagli"}</button>
@@ -573,6 +631,15 @@ function renderAdminList() {
       `
     )
     .join("");
+
+  adminProductList.querySelectorAll(".admin-product-row").forEach((row, index) => {
+    const product = products[index];
+    const summary = row.querySelector(".admin-product-row__copy p");
+    if (!product || !summary) return;
+    summary.textContent = `${product.brand || "Brand"} - ${product.category || "Categoria"}${
+      product.subcategory ? ` / ${product.subcategory}` : ""
+    } - ${formatPrice(product.price || 0)}`;
+  });
 }
 
 function renderAdminBrands() {
@@ -1041,6 +1108,7 @@ async function handleAdminSubmit(event) {
 
   const name = String(formData.get("name") || "").trim();
   const category = String(formData.get("category") || "").trim();
+  const subcategory = String(formData.get("subcategory") || "").trim();
   const brand = String(formData.get("brand") || "").trim();
   const subtitle = String(formData.get("subtitle") || "").trim();
   const description = String(formData.get("description") || "").trim();
@@ -1055,6 +1123,7 @@ async function handleAdminSubmit(event) {
     id: `${slugify(name)}-${Date.now()}`,
     name,
     category,
+    subcategory,
     brand,
     subtitle,
     description,
@@ -1075,6 +1144,7 @@ async function handleAdminSubmit(event) {
     if (showcaseField) {
       showcaseField.checked = true;
     }
+    hydrateAdminCategorySelects();
   } catch (error) {
     window.alert(error.message || "Non sono riuscito a salvare il prodotto.");
   }
@@ -2385,6 +2455,10 @@ adminForm?.addEventListener("submit", (event) => {
   });
 });
 
+adminCategorySelect?.addEventListener("change", () => {
+  populateSubcategoryOptions(adminCategorySelect.value);
+});
+
 brandForm?.addEventListener("submit", (event) => {
   if (!backendReady) {
     event.preventDefault();
@@ -2666,6 +2740,7 @@ if ("IntersectionObserver" in window) {
 
 syncScrollChrome();
 setAssistantOpen(false);
+hydrateAdminCategorySelects();
 bootstrapApp().catch((error) => {
   console.error(error);
   notifyBackendUnavailable("admin-login");

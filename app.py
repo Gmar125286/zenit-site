@@ -61,6 +61,7 @@ def init_db() -> None:
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             category TEXT,
+            subcategory TEXT,
             brand TEXT,
             subtitle TEXT,
             description TEXT,
@@ -105,6 +106,9 @@ def init_db() -> None:
         );
         """
     )
+    product_columns = {row["name"] for row in db.execute("PRAGMA table_info(products)").fetchall()}
+    if "subcategory" not in product_columns:
+        db.execute("ALTER TABLE products ADD COLUMN subcategory TEXT")
     db.commit()
 
 
@@ -117,6 +121,7 @@ def row_to_product(row: sqlite3.Row) -> dict[str, Any]:
         "id": row["id"],
         "name": row["name"],
         "category": row["category"] or "",
+        "subcategory": row["subcategory"] or "",
         "brand": row["brand"] or "",
         "subtitle": row["subtitle"] or "",
         "description": row["description"] or "",
@@ -288,13 +293,14 @@ def api_migrate() -> Any:
         db.execute(
             """
             INSERT OR IGNORE INTO products
-            (id, name, category, brand, subtitle, description, tags_json, price, image, showcase, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, name, category, subcategory, brand, subtitle, description, tags_json, price, image, showcase, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 product.get("id"),
                 product.get("name") or "Prodotto",
                 product.get("category") or "",
+                product.get("subcategory") or "",
                 product.get("brand") or "",
                 product.get("subtitle") or "",
                 product.get("description") or "",
@@ -442,13 +448,14 @@ def api_create_product() -> Any:
     payload = request.get_json(silent=True) or {}
     db.execute(
         """
-        INSERT INTO products (id, name, category, brand, subtitle, description, tags_json, price, image, showcase, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO products (id, name, category, subcategory, brand, subtitle, description, tags_json, price, image, showcase, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             payload.get("id"),
             payload.get("name") or "Prodotto",
             payload.get("category") or "",
+            payload.get("subcategory") or "",
             payload.get("brand") or "",
             payload.get("subtitle") or "",
             payload.get("description") or "",
