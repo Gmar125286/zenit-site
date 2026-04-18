@@ -68,6 +68,15 @@ const assistantWebModeToggle = document.querySelector("#assistant-web-mode");
 const assistantStatusCopy = document.querySelector("#assistant-status-copy");
 const adminCategorySelect = document.querySelector("#admin-category");
 const adminSubcategorySelect = document.querySelector("#admin-subcategory");
+const brandKnowledgePreview = document.querySelector("#brand-knowledge-preview");
+const adminProductIdField = document.querySelector("#admin-product-id");
+const adminProductSubmitButton = document.querySelector("#admin-product-submit-button");
+const adminProductCancelEditButton = document.querySelector("#admin-product-cancel-edit");
+const adminProductFormStatus = document.querySelector("#admin-product-form-status");
+const brandIdField = document.querySelector("#brand-id");
+const brandSubmitButton = document.querySelector("#brand-submit-button");
+const brandCancelEditButton = document.querySelector("#brand-cancel-edit");
+const brandFormStatus = document.querySelector("#brand-form-status");
 
 const PRODUCT_TAXONOMY = {
   Anticaduta: ["Imbracature base", "Imbracature professionali", "Kit completi", "Cordini", "Connettori", "Ancoraggi e linee vita"],
@@ -89,6 +98,8 @@ let query = "";
 let currentUser = null;
 let adminAuthenticated = false;
 let backendReady = false;
+let editingProductId = null;
+let editingBrandId = null;
 let assistantConversationState = {
   lastIntent: null,
   lastSector: null,
@@ -133,6 +144,7 @@ function normalizeBrand(brand) {
     label: String(brand.label || "").trim(),
     logo: String(brand.logo || "").trim(),
     website: String(brand.website || "").trim(),
+    email: String(brand.email || "").trim(),
     notes: String(brand.notes || "").trim(),
     knowledgeUpdatedAt: String(brand.knowledgeUpdatedAt || "").trim()
   };
@@ -463,6 +475,79 @@ function getProductById(id) {
   return products.find((product) => product.id === id);
 }
 
+function getBrandById(id) {
+  return brands.find((brand) => brand.id === id);
+}
+
+function resetProductFormState() {
+  editingProductId = null;
+  if (adminProductIdField) {
+    adminProductIdField.value = "";
+  }
+  if (adminProductSubmitButton) {
+    adminProductSubmitButton.textContent = "Aggiungi prodotto";
+  }
+  if (adminProductCancelEditButton) {
+    adminProductCancelEditButton.hidden = true;
+  }
+  if (adminProductFormStatus) {
+    adminProductFormStatus.textContent =
+      "I prodotti vengono salvati nel database del sito e restano disponibili anche dopo il riavvio.";
+  }
+  const showcaseField = document.querySelector("#admin-showcase");
+  if (showcaseField) {
+    showcaseField.checked = true;
+  }
+  hydrateAdminCategorySelects();
+}
+
+function startProductEdit(id) {
+  const product = getProductById(id);
+  if (!product || !adminForm) return;
+
+  editingProductId = product.id;
+  if (adminProductIdField) {
+    adminProductIdField.value = product.id;
+  }
+
+  const setValue = (selector, value) => {
+    const field = adminForm.querySelector(selector);
+    if (field) field.value = value || "";
+  };
+
+  setValue("#admin-name", product.name);
+  setValue("#admin-brand", product.brand);
+  setValue("#admin-subtitle", product.subtitle);
+  setValue("#admin-price", product.price);
+  setValue("#admin-tags", Array.isArray(product.tags) ? product.tags.join(", ") : "");
+  setValue("#admin-description", product.description);
+  setValue("#admin-image", product.image);
+  setValue("#admin-image-file", "");
+
+  if (adminCategorySelect) {
+    adminCategorySelect.value = product.category || "";
+  }
+  populateSubcategoryOptions(product.category || "", product.subcategory || "");
+
+  const showcaseField = document.querySelector("#admin-showcase");
+  if (showcaseField) {
+    showcaseField.checked = Boolean(product.showcase);
+  }
+
+  if (adminProductSubmitButton) {
+    adminProductSubmitButton.textContent = "Salva modifiche prodotto";
+  }
+  if (adminProductCancelEditButton) {
+    adminProductCancelEditButton.hidden = false;
+  }
+  if (adminProductFormStatus) {
+    adminProductFormStatus.textContent =
+      "Stai modificando un prodotto gia presente nel catalogo. Salvando, il catalogo viene aggiornato mantenendo lo stesso prodotto.";
+  }
+
+  adminForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function getHomepageProducts() {
   return products.filter((product) => product.showcase);
 }
@@ -572,8 +657,15 @@ function renderProducts() {
 
   productGrid.innerHTML = visibleProducts
     .map(
-      (product) => `
-        <article class="product-card">
+      (product, index) => `
+        <article class="product-card ${index === 0 ? "product-card--frame-example" : ""}">
+          <div class="product-card__frame" aria-hidden="true">
+            <span class="product-card__corner product-card__corner--tl"></span>
+            <span class="product-card__corner product-card__corner--tr"></span>
+            <span class="product-card__corner product-card__corner--bl"></span>
+            <span class="product-card__corner product-card__corner--br"></span>
+            ${index === 0 ? '<span class="product-card__frame-badge">Esempio cornice Zenit</span>' : ""}
+          </div>
           <div class="product-card__image">
             <span class="product-badge">${product.tags[0] || "Catalogo"}</span>
             <div class="product-tags">${product.tags
@@ -622,6 +714,7 @@ function renderAdminList() {
             <span class="admin-product-row__meta">${product.showcase ? "In vetrina home" : "Solo catalogo completo"}</span>
           </div>
           <div class="admin-product-row__actions">
+            <button class="ghost-button" type="button" data-edit-product="${product.id}">Modifica</button>
             <button class="ghost-button admin-toggle" type="button" data-toggle-showcase="${product.id}">
               ${product.showcase ? "Rimuovi vetrina" : "Metti in vetrina"}
             </button>
@@ -673,12 +766,20 @@ function renderAdminBrands() {
                 : ""
             }
             ${
+              brand.email
+                ? `<span class="admin-brand-row__notes">Email collegata: ${brand.email}</span>`
+                : ""
+            }
+            ${
               brand.notes
                 ? `<span class="admin-brand-row__notes">${brand.notes}</span>`
                 : `<span class="admin-brand-row__notes">Nessuna nota conoscitiva salvata per Carlo 2.0.</span>`
             }
           </div>
-          <button class="ghost-button admin-delete" type="button" data-delete-brand="${brand.id}">Elimina</button>
+          <div class="admin-brand-row__actions">
+            <button class="ghost-button" type="button" data-edit-brand="${brand.id}">Modifica</button>
+            <button class="ghost-button admin-delete" type="button" data-delete-brand="${brand.id}">Elimina</button>
+          </div>
         </article>
       `
     )
@@ -1002,6 +1103,74 @@ function refreshAll() {
   renderCart();
   bindScenicCards();
   syncAdminView();
+  syncBrandKnowledgePreview();
+}
+
+function syncBrandKnowledgePreview() {
+  if (!brandKnowledgePreview) return;
+  if (!brands.length) {
+    brandKnowledgePreview.value =
+      "Quando salvi un brand, Carlo 2.0 prova ad apprendere automaticamente dal sito ufficiale e dall'email aziendale collegata.";
+    return;
+  }
+  brandKnowledgePreview.value = brands[0]?.notes || "Brand salvato, ma Carlo 2.0 non ha ancora trovato abbastanza segnali automatici.";
+}
+
+function resetBrandFormState() {
+  editingBrandId = null;
+  if (brandIdField) {
+    brandIdField.value = "";
+  }
+  if (brandSubmitButton) {
+    brandSubmitButton.textContent = "Aggiungi brand";
+  }
+  if (brandCancelEditButton) {
+    brandCancelEditButton.hidden = true;
+  }
+  if (brandFormStatus) {
+    brandFormStatus.textContent =
+      "I brand aggiunti qui scorrono nella fascia partner del sito e fanno apprendere automaticamente Carlo 2.0 dal dominio aziendale collegato.";
+  }
+}
+
+function startBrandEdit(id) {
+  const brand = getBrandById(id);
+  if (!brand || !brandForm) return;
+
+  editingBrandId = brand.id;
+  if (brandIdField) {
+    brandIdField.value = brand.id;
+  }
+
+  const setValue = (selector, value) => {
+    const field = brandForm.querySelector(selector);
+    if (field) field.value = value || "";
+  };
+
+  setValue("#brand-name", brand.name);
+  setValue("#brand-label", brand.label);
+  setValue("#brand-website", brand.website);
+  setValue("#brand-email", brand.email);
+  setValue("#brand-logo", brand.logo);
+
+  const fileField = brandForm.querySelector("#brand-logo-file");
+  if (fileField) {
+    fileField.value = "";
+  }
+  if (brandKnowledgePreview) {
+    brandKnowledgePreview.value = brand.notes || "Questo brand non ha ancora conoscenza automatica sufficiente.";
+  }
+  if (brandSubmitButton) {
+    brandSubmitButton.textContent = "Salva modifiche brand";
+  }
+  if (brandCancelEditButton) {
+    brandCancelEditButton.hidden = false;
+  }
+  if (brandFormStatus) {
+    brandFormStatus.textContent =
+      "Stai modificando un brand esistente. Salvando, Carlo 2.0 ricalcola automaticamente le informazioni dal sito e dall'email collegata.";
+  }
+  brandForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function syncAdminView() {
@@ -1120,7 +1289,7 @@ async function handleAdminSubmit(event) {
   const showcase = formData.get("showcase") === "on";
 
   const product = normalizeProduct({
-    id: `${slugify(name)}-${Date.now()}`,
+    id: editingProductId || `${slugify(name)}-${Date.now()}`,
     name,
     category,
     subcategory,
@@ -1134,17 +1303,13 @@ async function handleAdminSubmit(event) {
   });
 
   try {
-    await apiFetch("/api/products", {
-      method: "POST",
+    await apiFetch(editingProductId ? `/api/products/${encodeURIComponent(editingProductId)}` : "/api/products", {
+      method: editingProductId ? "PATCH" : "POST",
       body: JSON.stringify(product)
     });
     await bootstrapApp();
     adminForm.reset();
-    const showcaseField = document.querySelector("#admin-showcase");
-    if (showcaseField) {
-      showcaseField.checked = true;
-    }
-    hydrateAdminCategorySelects();
+    resetProductFormState();
   } catch (error) {
     window.alert(error.message || "Non sono riuscito a salvare il prodotto.");
   }
@@ -1163,25 +1328,28 @@ async function handleBrandSubmit(event) {
   const name = String(formData.get("brandName") || "").trim();
   const label = String(formData.get("brandLabel") || "").trim();
   const website = String(formData.get("brandWebsite") || "").trim();
-  const notes = String(formData.get("brandNotes") || "").trim();
+  const email = String(formData.get("brandEmail") || "").trim();
 
   const brand = normalizeBrand({
-    id: `${slugify(name)}-${Date.now()}`,
+    id: editingBrandId || `${slugify(name)}-${Date.now()}`,
     name,
     label,
     logo: logo || createBrandPlaceholder(name),
     website,
-    notes,
+    email,
+    notes: "",
     knowledgeUpdatedAt: new Date().toISOString()
   });
 
   try {
-    await apiFetch("/api/brands", {
-      method: "POST",
+    await apiFetch(editingBrandId ? `/api/brands/${encodeURIComponent(editingBrandId)}` : "/api/brands", {
+      method: editingBrandId ? "PATCH" : "POST",
       body: JSON.stringify(brand)
     });
     await bootstrapApp();
     brandForm.reset();
+    resetBrandFormState();
+    syncBrandKnowledgePreview();
   } catch (error) {
     window.alert(error.message || "Non sono riuscito a salvare il brand.");
   }
@@ -1193,6 +1361,10 @@ async function handleDeleteProduct(id) {
       method: "DELETE"
     });
     await bootstrapApp();
+    if (editingProductId === id) {
+      adminForm?.reset();
+      resetProductFormState();
+    }
   } catch (error) {
     window.alert(error.message || "Non sono riuscito a eliminare il prodotto.");
   }
@@ -1204,6 +1376,11 @@ async function handleDeleteBrand(id) {
       method: "DELETE"
     });
     await bootstrapApp();
+    if (editingBrandId === id) {
+      brandForm?.reset();
+      resetBrandFormState();
+      syncBrandKnowledgePreview();
+    }
   } catch (error) {
     window.alert(error.message || "Non sono riuscito a eliminare il brand.");
   }
@@ -1841,6 +2018,7 @@ function getSiteKnowledge() {
       name: brand.name,
       label: brand.label,
       website: brand.website,
+      email: brand.email,
       notes: brand.notes,
       knowledgeUpdatedAt: brand.knowledgeUpdatedAt
     }))
@@ -1860,7 +2038,7 @@ function findMatchingProducts(question) {
 function findMatchingBrands(question) {
   const q = normalizeText(question);
   return brands.filter((brand) => {
-    const haystack = normalizeText(`${brand.name} ${brand.label} ${brand.website} ${brand.notes}`);
+    const haystack = normalizeText(`${brand.name} ${brand.label} ${brand.website} ${brand.email} ${brand.notes}`);
     return haystack.includes(q) || q.split(" ").some((term) => term.length > 2 && haystack.includes(term));
   });
 }
@@ -2291,10 +2469,11 @@ function answerAssistantQuestion(question) {
     if (featuredBrand && (q.includes(normalizeText(featuredBrand.name)) || /(brand|marchio|marca)/.test(q))) {
       const notes = featuredBrand.notes
         ? ` Quello che Carlo 2.0 ha assimilato su questo brand: ${featuredBrand.notes}`
-        : " Per questo brand non ci sono ancora note approfondite salvate nell'admin, quindi conviene arricchirlo con specializzazione, categorie forti, certificazioni e settori serviti.";
+        : " Per questo brand Carlo 2.0 non ha ancora trovato abbastanza segnali automatici dal dominio o dal sito collegato.";
       const website = featuredBrand.website ? ` Sito ufficiale: ${featuredBrand.website}.` : "";
+      const email = featuredBrand.email ? ` Email collegata: ${featuredBrand.email}.` : "";
       return {
-        text: `${featuredBrand.name}: ${featuredBrand.label || "brand partner presente nel sito."}${notes}${website}`,
+        text: `${featuredBrand.name}: ${featuredBrand.label || "brand partner presente nel sito."}${notes}${website}${email}`,
         action: () => handleAssistantAction("catalog"),
         meta: {
           lastIntent: "brand",
@@ -2478,6 +2657,12 @@ brandForm?.addEventListener("submit", (event) => {
 adminProductList?.addEventListener("click", (event) => {
   if (!isAdminAuthenticated()) return;
 
+  const editButton = event.target.closest("[data-edit-product]");
+  if (editButton) {
+    startProductEdit(editButton.dataset.editProduct);
+    return;
+  }
+
   const toggleButton = event.target.closest("[data-toggle-showcase]");
   if (toggleButton) {
     handleToggleShowcase(toggleButton.dataset.toggleShowcase);
@@ -2489,11 +2674,27 @@ adminProductList?.addEventListener("click", (event) => {
   handleDeleteProduct(deleteButton.dataset.delete);
 });
 
+adminProductCancelEditButton?.addEventListener("click", () => {
+  adminForm?.reset();
+  resetProductFormState();
+});
+
 adminBrandList?.addEventListener("click", (event) => {
   if (!isAdminAuthenticated()) return;
+  const editButton = event.target.closest("[data-edit-brand]");
+  if (editButton) {
+    startBrandEdit(editButton.dataset.editBrand);
+    return;
+  }
   const deleteButton = event.target.closest("[data-delete-brand]");
   if (!deleteButton) return;
   handleDeleteBrand(deleteButton.dataset.deleteBrand);
+});
+
+brandCancelEditButton?.addEventListener("click", () => {
+  brandForm?.reset();
+  resetBrandFormState();
+  syncBrandKnowledgePreview();
 });
 
 adminOrdersList?.addEventListener("change", (event) => {

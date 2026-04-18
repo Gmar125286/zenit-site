@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 from flask import Flask, g, jsonify, request, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -78,6 +81,7 @@ def init_db() -> None:
             label TEXT,
             logo TEXT,
             website TEXT,
+            email TEXT,
             notes TEXT,
             knowledge_updated_at TEXT,
             created_at TEXT NOT NULL
@@ -109,6 +113,9 @@ def init_db() -> None:
     product_columns = {row["name"] for row in db.execute("PRAGMA table_info(products)").fetchall()}
     if "subcategory" not in product_columns:
         db.execute("ALTER TABLE products ADD COLUMN subcategory TEXT")
+    brand_columns = {row["name"] for row in db.execute("PRAGMA table_info(brands)").fetchall()}
+    if "email" not in brand_columns:
+        db.execute("ALTER TABLE brands ADD COLUMN email TEXT")
     db.commit()
 
 
@@ -139,9 +146,156 @@ def row_to_brand(row: sqlite3.Row) -> dict[str, Any]:
         "label": row["label"] or "",
         "logo": row["logo"] or "",
         "website": row["website"] or "",
+        "email": row["email"] or "",
         "notes": row["notes"] or "",
         "knowledgeUpdatedAt": row["knowledge_updated_at"] or "",
     }
+
+
+BRAND_CATEGORY_SIGNALS: dict[str, list[str]] = {
+    "Anticaduta": ["fall protection", "anticaduta", "harness", "imbrac", "lifeline", "linee vita", "anchor", "cordino"],
+    "Antinfortunistica": ["ppe", "dpi", "guanti", "helmet", "elmet", "safety glasses", "respirator", "protezion"],
+    "Calzature e Abbigliamento": ["footwear", "safety shoes", "calzature", "abbigliamento", "workwear", "alta visibil", "protective clothing"],
+    "Prodotti ATEX": ["atex", "explosion proof", "explosive atmosphere", "gas detector", "intrinsically safe"],
+    "Spazi Confinati": ["confined space", "spazi confinati", "tripod", "retrieval", "rescue", "davit"],
+    "Saldatura": ["welding", "saldatura", "welder", "maschere saldatura", "welding helmet"],
+    "Sicurezza Ambientale": ["spill", "environmental", "antinquinamento", "containment", "assorbent", "gestione ambientale"],
+}
+
+BRAND_CERTIFICATION_SIGNALS: dict[str, list[str]] = {
+    "ATEX": ["atex", "2014/34/eu"],
+    "EN 361": ["en 361"],
+    "EN 795": ["en 795"],
+    "EN ISO 20471": ["en iso 20471", "high visibility"],
+    "EN ISO 20345": ["en iso 20345", "s3", "s1p"],
+    "ISO 9001": ["iso 9001"],
+    "ISO 45001": ["iso 45001"],
+    "CE": ["ce ", " ce-", "ce-certified", "marcatura ce", "certified ce"],
+}
+
+BRAND_SECTOR_SIGNALS: dict[str, list[str]] = {
+    "Chimico": ["chemical", "chimic", "laboratory", "process plant"],
+    "Petrolchimico": ["oil", "gas", "petro", "refinery", "offshore", "onshore"],
+    "Edile & Costruzioni": ["construction", "cantiere", "roofing", "building", "scaffold"],
+    "Energetico": ["energy", "power plant", "utility", "renewable", "electric"],
+    "Navale & Marittimo": ["marine", "maritime", "shipyard", "naval", "offshore"],
+    "Automotive & Trasporti": ["automotive", "transport", "assembly", "fleet", "warehouse"],
+    "Servizi & Facility": ["facility", "maintenance", "service", "cleaning", "operations"],
+}
+
+
+def normalize_brand_website(website: str, email: str) -> str:
+    raw = (website or "").strip()
+    if not raw and email and "@" in email:
+        domain = email.split("@", 1)[1].strip().lower()
+        if domain:
+            raw = f"https://{domain}"
+    if raw and not re.match(r"^https?://", raw, flags=re.IGNORECASE):
+        raw = f"https://{raw}"
+    return raw
+
+
+def strip_html_text(value: str) -> str:
+    cleaned = re.sub(r"(?is)<script.*?>.*?</script>", " ", value)
+    cleaned = re.sub(r"(?is)<style.*?>.*?</style>", " ", cleaned)
+    cleaned = re.sub(r"(?s)<[^>]+>", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
+
+
+def truncate_words(value: str, limit: int) -> str:
+    words = value.split()
+    if len(words) <= limit:
+        return value
+    return " ".join(words[:limit]).strip() + "..."
+
+
+def extract_site_snapshot(url: str) -> dict[str, str]:
+    if not url:
+        return {"url": "", "title": "", "description": "", "text": ""}
+    try:
+        request_obj = Request(
+            url,
+            headers={
+                "User-Agent": "ZenitCarlo2/1.0 (+https://zenitsrl.it)"
+            },
+        )
+        with urlopen(request_obj, timeout=8) as response:
+            html = response.read(120000).decode("utf-8", errors="ignore")
+        title_match = re.search(r"(?is)<title[^>]*>(.*?)</title>", html)
+        desc_match = re.search(
+            r'(?is)<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']',
+            html,
+        ) or re.search(
+            r'(?is)<meta[^>]+content=["\'](.*?)["\'][^>]+name=["\']description["\']',
+            html,
+        )
+        text = truncate_words(strip_html_text(html), 140)
+        return {
+            "url": url,
+            "title": strip_html_text(title_match.group(1)) if title_match else "",
+            "description": strip_html_text(desc_match.group(1)) if desc_match else "",
+            "text": text,
+        }
+    except Exception:
+        return {"url": url, "title": "", "description": "", "text": ""}
+
+
+def find_signal_matches(source_text: str, signals: dict[str, list[str]], max_items: int = 4) -> list[str]:
+    lowered = source_text.lower()
+    matches: list[str] = []
+    for label, keywords in signals.items():
+        if any(keyword.lower() in lowered for keyword in keywords):
+            matches.append(label)
+    return matches[:max_items]
+
+
+def infer_brand_knowledge(name: str, label: str, website: str, email: str) -> tuple[str, str]:
+    normalized_website = normalize_brand_website(website, email)
+    snapshot = extract_site_snapshot(normalized_website)
+    source_text = " ".join(
+        [
+            name or "",
+            label or "",
+            email or "",
+            snapshot.get("title", ""),
+            snapshot.get("description", ""),
+            snapshot.get("text", ""),
+        ]
+    ).strip()
+    categories = find_signal_matches(source_text, BRAND_CATEGORY_SIGNALS)
+    certifications = find_signal_matches(source_text, BRAND_CERTIFICATION_SIGNALS, max_items=5)
+    sectors = find_signal_matches(source_text, BRAND_SECTOR_SIGNALS)
+
+    parsed = urlparse(normalized_website) if normalized_website else None
+    domain = (parsed.netloc or "").replace("www.", "") if parsed else ""
+
+    identity_source = snapshot.get("description") or snapshot.get("title") or label or ""
+    identity_line = truncate_words(identity_source, 22) if identity_source else ""
+
+    note_parts: list[str] = []
+    if identity_line:
+        note_parts.append(f"Profilo rilevato: {identity_line}")
+    if categories:
+        note_parts.append(f"Aree probabili del brand: {', '.join(categories)}")
+    if certifications:
+        note_parts.append(f"Segnali di certificazione o conformita: {', '.join(certifications)}")
+    if sectors:
+        note_parts.append(f"Settori che il brand sembra servire: {', '.join(sectors)}")
+    if domain:
+        note_parts.append(f"Dominio analizzato: {domain}")
+    if email:
+        note_parts.append(f"Contatto aziendale collegato: {email}")
+
+    if not note_parts:
+        note_parts.append(
+            "Carlo 2.0 non ha trovato abbastanza segnali automatici dal dominio collegato, ma il brand e stato registrato e potra essere arricchito in seguito."
+        )
+
+    inferred_label = label or identity_line or (
+        f"Brand orientato a {categories[0].lower()}" if categories else "Brand partner tecnico"
+    )
+    return inferred_label, ". ".join(note_parts)
 
 
 def get_current_user() -> dict[str, Any] | None:
@@ -317,15 +471,16 @@ def api_migrate() -> Any:
         db.execute(
             """
             INSERT OR IGNORE INTO brands
-            (id, name, label, logo, website, notes, knowledge_updated_at, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (id, name, label, logo, website, email, notes, knowledge_updated_at, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 brand.get("id"),
                 brand.get("name") or "Brand",
                 brand.get("label") or "",
                 brand.get("logo") or "",
-                brand.get("website") or "",
+                normalize_brand_website(brand.get("website") or "", brand.get("email") or ""),
+                brand.get("email") or "",
                 brand.get("notes") or "",
                 brand.get("knowledgeUpdatedAt") or "",
                 now_iso(),
@@ -470,6 +625,40 @@ def api_create_product() -> Any:
     return jsonify({"ok": True, "products": get_all_products()})
 
 
+@app.patch("/api/products/<product_id>")
+def api_update_product(product_id: str) -> Any:
+    if (resp := require_admin()) is not None:
+        return resp
+    db = get_db()
+    row = db.execute("SELECT id FROM products WHERE id = ?", (product_id,)).fetchone()
+    if not row:
+        return jsonify({"error": "Prodotto non trovato."}), 404
+
+    payload = request.get_json(silent=True) or {}
+    db.execute(
+        """
+        UPDATE products
+        SET name = ?, category = ?, subcategory = ?, brand = ?, subtitle = ?, description = ?, tags_json = ?, price = ?, image = ?, showcase = ?
+        WHERE id = ?
+        """,
+        (
+            payload.get("name") or "Prodotto",
+            payload.get("category") or "",
+            payload.get("subcategory") or "",
+            payload.get("brand") or "",
+            payload.get("subtitle") or "",
+            payload.get("description") or "",
+            json.dumps(payload.get("tags") or []),
+            float(payload.get("price") or 0),
+            payload.get("image") or "",
+            1 if payload.get("showcase") else 0,
+            product_id,
+        ),
+    )
+    db.commit()
+    return jsonify({"ok": True, "products": get_all_products()})
+
+
 @app.delete("/api/products/<product_id>")
 def api_delete_product(product_id: str) -> Any:
     if (resp := require_admin()) is not None:
@@ -500,20 +689,64 @@ def api_create_brand() -> Any:
         return resp
     db = get_db()
     payload = request.get_json(silent=True) or {}
+    inferred_label, inferred_notes = infer_brand_knowledge(
+        str(payload.get("name") or "").strip(),
+        str(payload.get("label") or "").strip(),
+        str(payload.get("website") or "").strip(),
+        str(payload.get("email") or "").strip(),
+    )
     db.execute(
         """
-        INSERT INTO brands (id, name, label, logo, website, notes, knowledge_updated_at, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO brands (id, name, label, logo, website, email, notes, knowledge_updated_at, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             payload.get("id"),
             payload.get("name") or "Brand",
-            payload.get("label") or "",
+            payload.get("label") or inferred_label,
             payload.get("logo") or "",
-            payload.get("website") or "",
-            payload.get("notes") or "",
+            normalize_brand_website(payload.get("website") or "", payload.get("email") or ""),
+            payload.get("email") or "",
+            payload.get("notes") or inferred_notes,
             payload.get("knowledgeUpdatedAt") or now_iso(),
             now_iso(),
+        ),
+    )
+    db.commit()
+    return jsonify({"ok": True, "brands": get_all_brands()})
+
+
+@app.patch("/api/brands/<brand_id>")
+def api_update_brand(brand_id: str) -> Any:
+    if (resp := require_admin()) is not None:
+        return resp
+    db = get_db()
+    existing = db.execute("SELECT id, created_at FROM brands WHERE id = ?", (brand_id,)).fetchone()
+    if not existing:
+        return jsonify({"error": "Brand non trovato."}), 404
+
+    payload = request.get_json(silent=True) or {}
+    inferred_label, inferred_notes = infer_brand_knowledge(
+        str(payload.get("name") or "").strip(),
+        str(payload.get("label") or "").strip(),
+        str(payload.get("website") or "").strip(),
+        str(payload.get("email") or "").strip(),
+    )
+    db.execute(
+        """
+        UPDATE brands
+        SET name = ?, label = ?, logo = ?, website = ?, email = ?, notes = ?, knowledge_updated_at = ?
+        WHERE id = ?
+        """,
+        (
+            payload.get("name") or "Brand",
+            payload.get("label") or inferred_label,
+            payload.get("logo") or "",
+            normalize_brand_website(payload.get("website") or "", payload.get("email") or ""),
+            payload.get("email") or "",
+            payload.get("notes") or inferred_notes,
+            payload.get("knowledgeUpdatedAt") or now_iso(),
+            brand_id,
         ),
     )
     db.commit()

@@ -115,6 +115,7 @@
           <div class="admin-grid">
             <div class="admin-column">
               <form class="admin-form" id="admin-form">
+                <input id="admin-product-id" name="productId" type="hidden" />
                 <div class="form-field">
                   <label for="admin-name">Nome prodotto</label>
                   <input id="admin-name" name="name" type="text" required placeholder="Imbracatura anticaduta X-Pro" />
@@ -164,8 +165,11 @@
                   <span>Mostra questo prodotto nella vetrina della homepage</span>
                 </label>
                 <div class="admin-form__footer full-span">
-                  <p>I prodotti vengono salvati nel database del sito e restano disponibili anche dopo il riavvio.</p>
-                  <button class="primary-button" type="submit">Aggiungi prodotto</button>
+                  <p id="admin-product-form-status">I prodotti vengono salvati nel database del sito e restano disponibili anche dopo il riavvio.</p>
+                  <div class="admin-form__actions">
+                    <button class="primary-button" id="admin-product-submit-button" type="submit">Aggiungi prodotto</button>
+                    <button class="ghost-button" id="admin-product-cancel-edit" type="button" hidden>Annulla modifica</button>
+                  </div>
                 </div>
               </form>
 
@@ -180,6 +184,7 @@
 
             <div class="admin-column">
               <form class="admin-form admin-form--brand" id="brand-form">
+                <input id="brand-id" name="brandId" type="hidden" />
                 <div class="form-field">
                   <label for="brand-name">Nome brand</label>
                   <input id="brand-name" name="brandName" type="text" required placeholder="IRUDEK" />
@@ -193,11 +198,15 @@
                   <input id="brand-website" name="brandWebsite" type="url" placeholder="https://www.brand.com" />
                 </div>
                 <div class="form-field full-span">
-                  <label for="brand-notes">Note conoscitive per Carlo 2.0</label>
+                  <label for="brand-email">Email aziendale brand</label>
+                  <input id="brand-email" name="brandEmail" type="email" placeholder="info@brand.com" />
+                </div>
+                <div class="form-field full-span">
+                  <label for="brand-knowledge-preview">Apprendimento automatico Carlo 2.0</label>
                   <textarea
-                    id="brand-notes"
-                    name="brandNotes"
-                    placeholder="Inserisci qui informazioni importanti: specializzazione, categorie forti, certificazioni, settori serviti..."
+                    id="brand-knowledge-preview"
+                    readonly
+                    placeholder="Quando salvi il brand, Carlo 2.0 prova ad apprendere in automatico da sito ed email aziendale: specializzazione, categorie forti, possibili settori, segnali di certificazione e posizionamento."
                   ></textarea>
                 </div>
                 <div class="form-field full-span">
@@ -209,8 +218,11 @@
                   <input id="brand-logo-file" name="brandLogoFile" type="file" accept="image/*" />
                 </div>
                 <div class="admin-form__footer full-span">
-                  <p>I brand aggiunti qui scorrono nella fascia partner del sito e arricchiscono la conoscenza di Carlo 2.0.</p>
-                  <button class="primary-button" type="submit">Aggiungi brand</button>
+                  <p id="brand-form-status">I brand aggiunti qui scorrono nella fascia partner del sito e fanno apprendere automaticamente Carlo 2.0 dal dominio aziendale collegato.</p>
+                  <div class="admin-form__actions">
+                    <button class="primary-button" id="brand-submit-button" type="submit">Aggiungi brand</button>
+                    <button class="ghost-button" id="brand-cancel-edit" type="button" hidden>Annulla modifica</button>
+                  </div>
                 </div>
               </form>
 
