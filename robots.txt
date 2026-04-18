@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin-login.html
+Disallow: /auth.html
+Disallow: /ordini.html
+
+Sitemap: https://zenitsrl.up.railway.app/sitemap.xml
