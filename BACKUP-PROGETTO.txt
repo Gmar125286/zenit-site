@@ -1,0 +1,36 @@
+Per creare un backup completo del progetto:
+
+1. Apri la cartella del progetto.
+2. Fai doppio click su `backup-project.bat`.
+3. Aspetta la fine del processo.
+
+Il backup verra salvato nella cartella:
+
+- `backups`
+
+Nome file:
+
+- `New project-backup-AAAAMMGG-HHMMSS.zip`
+
+Il backup include:
+
+- file HTML, CSS, JS e Python
+- immagini e risorse
+- file di configurazione
+- database `zenit.db`
+
+Il backup esclude:
+
+- cartella `.git`
+- cache Python `__pycache__`
+- vecchi backup dentro `backups`
+
+Modalita automatica:
+
+- lo script mantiene automaticamente solo gli ultimi `20` backup
+- i backup piu vecchi vengono eliminati in automatico
+
+Per ripristinare:
+
+1. Estrai lo zip in una nuova cartella.
+2. Avvia il progetto normalmente.

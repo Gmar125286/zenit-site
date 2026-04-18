@@ -4196,3 +4196,347 @@ body[data-page="home"] .admin-panel {
     align-items: stretch;
   }
 }
+
+@media (max-width: 560px) {
+  .container {
+    width: min(calc(100% - 16px), var(--container));
+  }
+
+  .main-header {
+    padding: 10px 0 12px;
+  }
+
+  .header-row {
+    gap: 14px;
+    padding: 10px 0;
+  }
+
+  .logo-block {
+    justify-content: center;
+  }
+
+  .logo-image {
+    width: min(200px, 72vw);
+  }
+
+  .search-shell {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    height: 52px;
+    padding: 0 14px;
+    border-radius: 18px;
+  }
+
+  .search-shell input {
+    font-size: 0.96rem;
+  }
+
+  .header-cta {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .header-cta > * {
+    width: 100%;
+  }
+
+  .header-cta .ghost-button,
+  .header-cta .register-button,
+  .header-cta .primary-button,
+  .header-cta .secondary-button,
+  .header-cta > a {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .user-session {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .icon-cart {
+    align-self: center;
+  }
+
+  .catalog-nav__inner {
+    gap: 12px;
+    padding: 10px 0;
+    scroll-snap-type: x proximity;
+  }
+
+  .nav-item {
+    min-width: min(82vw, 320px);
+    scroll-snap-align: start;
+  }
+
+  .nav-trigger {
+    min-height: 48px;
+    font-size: 0.96rem;
+    padding: 0 14px;
+  }
+
+  .nav-dropdown {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .hero__inner,
+  .catalog-hero,
+  .dark-story__inner,
+  .admin-login-page,
+  .auth-page,
+  .orders-page,
+  .quote-panel,
+  .site-footer {
+    padding-top: 34px;
+  }
+
+  .hero__inner {
+    gap: 26px;
+    padding-bottom: 34px;
+  }
+
+  .hero-copy h1,
+  .dark-story__copy h2,
+  .catalog-hero__inner h1,
+  .admin-login-page__copy h1,
+  .auth-page__copy h1,
+  .orders-page__copy h1,
+  .quote-panel h2 {
+    font-size: clamp(2rem, 11vw, 2.65rem);
+    line-height: 0.98;
+  }
+
+  .hero-copy p,
+  .catalog-hero__inner p,
+  .admin-login-page__copy p,
+  .auth-page__copy p,
+  .orders-page__copy p,
+  .dark-story__copy p,
+  .quote-panel__copy p {
+    font-size: 0.96rem;
+    line-height: 1.65;
+  }
+
+  .hero-actions,
+  .cert-pill-row,
+  .quote-benefits,
+  .filters {
+    gap: 10px;
+  }
+
+  .hero-actions > *,
+  .filters > * {
+    width: 100%;
+  }
+
+  .cert-pill-row span,
+  .quote-benefits span,
+  .filters button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .highlight-card,
+  .catalog-hero__panel,
+  .quote-panel__inner,
+  .admin-login-card,
+  .admin-form,
+  .admin-list-card,
+  .footer-card,
+  .order-card,
+  .auth-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .highlight-card__placeholder {
+    min-height: 220px;
+  }
+
+  .stats-band {
+    padding: 18px 0;
+  }
+
+  .stats-band__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0;
+  }
+
+  .stats-band__inner article {
+    padding: 18px;
+  }
+
+  .contact-mini span {
+    width: 100%;
+    font-size: 0.94rem;
+    padding: 14px 16px;
+  }
+
+  .story-badge {
+    width: 100%;
+    text-align: center;
+  }
+
+  .dark-story__stats {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .story-stat-card,
+  .dark-story__stats article,
+  .sectors-grid article {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .story-stat-card strong {
+    font-size: 2.25rem;
+  }
+
+  .story-stat-card p {
+    min-height: 0;
+    max-width: 100%;
+  }
+
+  .areas-grid,
+  .product-grid,
+  .sectors-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .product-card__image {
+    aspect-ratio: 1 / 1;
+  }
+
+  .brands-strip {
+    padding: 22px 0 34px;
+  }
+
+  .brands-marquee::before,
+  .brands-marquee::after {
+    width: 32px;
+  }
+
+  .brand-chip {
+    min-width: 86vw;
+    min-height: 104px;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .brand-chip__logo {
+    width: 84px;
+    height: 58px;
+  }
+
+  .section-head,
+  .section-head--stacked {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .section-head::after {
+    margin-top: 4px;
+  }
+
+  .footer-grid {
+    gap: 14px;
+  }
+
+  .assistant-widget {
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+  }
+
+  .assistant-toggle {
+    min-height: 52px;
+  }
+
+  .assistant-panel {
+    width: 100%;
+    padding: 18px;
+    border-radius: 24px;
+    max-height: calc(100vh - 92px);
+  }
+
+  .assistant-panel__header {
+    gap: 12px;
+  }
+
+  .assistant-panel__header h3 {
+    font-size: 1.08rem;
+  }
+
+  .assistant-messages {
+    max-height: 42vh;
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    width: min(calc(100% - 12px), var(--container));
+  }
+
+  .logo-image {
+    width: min(176px, 68vw);
+  }
+
+  .search-shell {
+    height: 48px;
+    padding: 0 12px;
+  }
+
+  .nav-item {
+    min-width: min(88vw, 300px);
+  }
+
+  .hero-copy h1,
+  .dark-story__copy h2,
+  .catalog-hero__inner h1,
+  .admin-login-page__copy h1,
+  .auth-page__copy h1,
+  .orders-page__copy h1,
+  .quote-panel h2 {
+    font-size: clamp(1.82rem, 10vw, 2.3rem);
+  }
+
+  .highlight-card__placeholder {
+    min-height: 184px;
+  }
+
+  .stats-band__inner strong,
+  .dark-story__stats strong {
+    font-size: 1.86rem;
+  }
+
+  .story-stat-card strong {
+    font-size: 2rem;
+  }
+
+  .cert-pill-row span,
+  .quote-benefits span,
+  .filters button {
+    font-size: 0.84rem;
+    padding: 10px 12px;
+  }
+
+  .brand-chip {
+    min-width: 90vw;
+  }
+
+  .assistant-panel {
+    padding: 16px;
+  }
+}
