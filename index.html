@@ -58,7 +58,15 @@
       </div>
     </header>
 
-    <nav class="catalog-nav">
+    <div class="mobile-catalog-toggle-wrap">
+      <div class="container">
+        <button class="mobile-catalog-toggle" id="catalog-nav-toggle" type="button" aria-expanded="false" aria-controls="catalog-nav">
+          <span>Categorie</span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="catalog-nav" id="catalog-nav">
       <div class="container catalog-nav__inner">
         <div class="nav-item nav-item--simple">
           <a class="nav-trigger nav-trigger--link" href="catalogo.html">Tutti i DPI</a>
@@ -717,7 +725,7 @@
     <aside class="assistant-widget" id="assistant-widget" aria-live="polite">
       <button class="assistant-toggle" id="assistant-toggle" type="button" aria-expanded="false" aria-controls="assistant-panel">
         <span class="assistant-toggle__dot"></span>
-        <span>Carlo 2.0</span>
+        <span class="assistant-toggle__label">Carlo 2.0</span>
       </button>
       <div class="assistant-panel" id="assistant-panel" hidden>
         <div class="assistant-panel__header">
