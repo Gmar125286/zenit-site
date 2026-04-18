@@ -4304,26 +4304,42 @@ body[data-page="home"] .admin-panel {
   }
 
   .catalog-nav__inner {
-    gap: 12px;
-    padding: 8px 0;
+    gap: 10px;
+    padding: 6px 0;
     scroll-snap-type: x proximity;
   }
 
   .nav-item {
-    min-width: min(82vw, 320px);
+    min-width: min(72vw, 272px);
     scroll-snap-align: start;
   }
 
   .nav-trigger {
-    min-height: 48px;
-    font-size: 0.96rem;
-    padding: 0 14px;
+    min-height: 42px;
+    font-size: 0.88rem;
+    padding: 0 12px;
+    border-radius: 14px;
   }
 
   .nav-dropdown {
     margin-top: 10px;
-    padding: 14px;
-    border-radius: 20px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .nav-dropdown article {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .nav-dropdown a {
+    padding: 7px 0;
+    font-size: 0.9rem;
+  }
+
+  .nav-dropdown span {
+    margin-bottom: 8px;
+    font-size: 0.68rem;
   }
 
   .hero__inner,
@@ -4368,20 +4384,41 @@ body[data-page="home"] .admin-panel {
   .cert-pill-row,
   .quote-benefits,
   .filters {
-    gap: 10px;
+    gap: 8px;
   }
 
-  .hero-actions > *,
-  .filters > * {
+  .hero-actions > * {
     width: 100%;
   }
 
   .cert-pill-row span,
-  .quote-benefits span,
-  .filters button {
+  .quote-benefits span {
     width: 100%;
     justify-content: center;
     text-align: center;
+  }
+
+  .filters {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .filters > * {
+    width: auto;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .filters button {
+    width: auto;
+    min-height: 38px;
+    padding: 9px 12px;
+    white-space: nowrap;
+    font-size: 0.82rem;
   }
 
   .highlight-card,
@@ -4399,6 +4436,18 @@ body[data-page="home"] .admin-panel {
 
   .highlight-card__placeholder {
     min-height: 220px;
+  }
+
+  .catalog-hero {
+    padding-bottom: 18px;
+  }
+
+  .catalog-hero__panel strong {
+    font-size: 2.45rem;
+  }
+
+  .catalog-hero__panel span {
+    font-size: 0.72rem;
   }
 
   .stats-band {
@@ -4455,8 +4504,53 @@ body[data-page="home"] .admin-panel {
     gap: 14px;
   }
 
+  .product-card {
+    gap: 12px;
+    padding: 16px;
+    border-radius: 20px;
+  }
+
   .product-card__image {
     aspect-ratio: 1 / 1;
+    min-height: 0;
+    border-radius: 16px;
+  }
+
+  .product-badge,
+  .product-tags span {
+    font-size: 0.64rem;
+    padding: 5px 8px;
+  }
+
+  .product-tags {
+    gap: 4px;
+  }
+
+  .product-card h3 {
+    font-size: 1rem;
+    line-height: 1.28;
+  }
+
+  .product-subtitle,
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  .product-price {
+    font-size: 1.28rem;
+  }
+
+  .product-actions {
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .product-actions .primary-button,
+  .product-actions .ghost-button {
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 0.86rem;
   }
 
   .brands-strip {
@@ -4566,7 +4660,13 @@ body[data-page="home"] .admin-panel {
   }
 
   .nav-item {
-    min-width: min(88vw, 300px);
+    min-width: min(78vw, 250px);
+  }
+
+  .nav-trigger {
+    min-height: 40px;
+    font-size: 0.84rem;
+    padding: 0 10px;
   }
 
   .hero-copy h1,
@@ -4596,7 +4696,7 @@ body[data-page="home"] .admin-panel {
   .quote-benefits span,
   .filters button {
     font-size: 0.84rem;
-    padding: 10px 12px;
+    padding: 9px 11px;
   }
 
   .brand-chip {
@@ -4605,5 +4705,17 @@ body[data-page="home"] .admin-panel {
 
   .assistant-panel {
     padding: 16px;
+  }
+
+  .product-card {
+    padding: 14px;
+  }
+
+  .product-card h3 {
+    font-size: 0.96rem;
+  }
+
+  .product-price {
+    font-size: 1.18rem;
   }
 }
