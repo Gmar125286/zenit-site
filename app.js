@@ -593,11 +593,13 @@ function renderBrands() {
       (brand) => `
         <article class="brand-chip">
           <div class="brand-chip__logo">
+            ${
+              brand.website
+                ? `<a class="brand-chip__link" href="${brand.website}" target="_blank" rel="noreferrer" aria-label="Apri il sito di ${brand.name}">
             <img src="${brand.logo || createBrandPlaceholder(brand.name)}" alt="Logo ${brand.name}" loading="lazy" />
-          </div>
-          <div class="brand-chip__copy">
-            <strong>${brand.name}</strong>
-            <span>${brand.label || "Partner tecnico Zenit"}</span>
+          </a>`
+                : `<img src="${brand.logo || createBrandPlaceholder(brand.name)}" alt="Logo ${brand.name}" loading="lazy" />`
+            }
           </div>
         </article>
       `
