@@ -4,10 +4,11 @@ import json
 import os
 import re
 import sqlite3
+from html import unescape
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, quote_plus, urlparse
 from urllib.request import Request, urlopen
 
 from flask import Flask, g, jsonify, request, send_from_directory, session
@@ -296,6 +297,179 @@ def infer_brand_knowledge(name: str, label: str, website: str, email: str) -> tu
         f"Brand orientato a {categories[0].lower()}" if categories else "Brand partner tecnico"
     )
     return inferred_label, ". ".join(note_parts)
+
+
+def get_token_overlap_score(query: str, candidate: str) -> int:
+    query_tokens = {token for token in re.split(r"\s+", query.lower()) if len(token) > 2}
+    candidate_tokens = {token for token in re.split(r"\s+", candidate.lower()) if len(token) > 2}
+    if not query_tokens or not candidate_tokens:
+        return 0
+    score = 0
+    for candidate_token in candidate_tokens:
+        if any(
+            candidate_token == query_token
+            or candidate_token in query_token
+            or query_token in candidate_token
+            for query_token in query_tokens
+        ):
+            score += 1
+    return score
+
+
+def strip_html_fragment(value: str) -> str:
+    return strip_html_text(unescape(value or ""))
+
+
+def unwrap_duckduckgo_url(url: str) -> str:
+    parsed = urlparse(url)
+    if "duckduckgo.com" not in parsed.netloc:
+        return url
+    query = parse_qs(parsed.query)
+    target = query.get("uddg", [""])[0]
+    return target or url
+
+
+def duckduckgo_search(query: str, limit: int = 4) -> list[dict[str, str]]:
+    try:
+        url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
+        request_obj = Request(
+            url,
+            headers={
+                "User-Agent": "ZenitCarlo2/1.0 (+https://zenitsrl.it)"
+            },
+        )
+        with urlopen(request_obj, timeout=10) as response:
+            html = response.read(180000).decode("utf-8", errors="ignore")
+    except Exception:
+        return []
+
+    matches = re.findall(
+        r'(?is)<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>(.*?)</a>.*?<a[^>]+class="result__snippet"[^>]*>(.*?)</a>|'
+        r'(?is)<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>(.*?)</a>.*?<div[^>]+class="result__snippet"[^>]*>(.*?)</div>',
+        html,
+    )
+
+    results: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for match in matches:
+        raw_url = match[0] or match[3]
+        title = match[1] or match[4]
+        snippet = match[2] or match[5]
+        final_url = unwrap_duckduckgo_url(raw_url)
+        if not final_url or final_url in seen_urls:
+            continue
+        seen_urls.add(final_url)
+        results.append(
+            {
+                "title": strip_html_fragment(title),
+                "url": final_url,
+                "snippet": truncate_words(strip_html_fragment(snippet), 36),
+                "domain": urlparse(final_url).netloc.replace("www.", ""),
+            }
+        )
+        if len(results) >= limit:
+            break
+    return results
+
+
+def build_assistant_web_research(question: str, brands: list[dict[str, Any]], products: list[dict[str, Any]]) -> dict[str, Any]:
+    normalized_question = strip_html_text(question)
+    brand_candidates = sorted(
+        brands,
+        key=lambda brand: get_token_overlap_score(
+            normalized_question,
+            " ".join([brand.get("name", ""), brand.get("label", ""), brand.get("website", ""), brand.get("notes", "")]),
+        ),
+        reverse=True,
+    )
+    brand_candidates = [brand for brand in brand_candidates if brand.get("website")][:3]
+
+    brand_sources: list[dict[str, str]] = []
+    for brand in brand_candidates:
+        snapshot = extract_site_snapshot(brand.get("website") or "")
+        summary = snapshot.get("description") or snapshot.get("title") or snapshot.get("text") or ""
+        if not summary:
+            continue
+        brand_sources.append(
+            {
+                "type": "brand",
+                "title": f"{brand.get('name') or 'Brand'} • sito ufficiale",
+                "url": snapshot.get("url") or brand.get("website") or "",
+                "snippet": truncate_words(summary, 36),
+                "domain": urlparse(snapshot.get("url") or brand.get("website") or "").netloc.replace("www.", ""),
+            }
+        )
+
+    product_candidates = sorted(
+        products,
+        key=lambda product: get_token_overlap_score(
+            normalized_question,
+            " ".join(
+                [
+                    product.get("name", ""),
+                    product.get("brand", ""),
+                    product.get("category", ""),
+                    product.get("subcategory", ""),
+                    product.get("description", ""),
+                    " ".join(product.get("tags") or []),
+                ]
+            ),
+        ),
+        reverse=True,
+    )
+    product_candidates = [product for product in product_candidates if get_token_overlap_score(normalized_question, product.get("name", "")) > 0][:3]
+
+    search_results = duckduckgo_search(f"{normalized_question} DPI sicurezza brand attrezzature", limit=4)
+    fetched_web_sources: list[dict[str, str]] = []
+    for result in search_results[:3]:
+        if not result.get("url", "").startswith(("http://", "https://")):
+            continue
+        snapshot = extract_site_snapshot(result["url"])
+        enriched_snippet = snapshot.get("description") or snapshot.get("text") or result.get("snippet") or ""
+        fetched_web_sources.append(
+            {
+                "type": "web",
+                "title": result.get("title") or result.get("domain") or "Fonte web",
+                "url": result.get("url") or "",
+                "snippet": truncate_words(enriched_snippet, 40),
+                "domain": result.get("domain") or urlparse(result.get("url") or "").netloc.replace("www.", ""),
+            }
+        )
+
+    sources = [*brand_sources]
+    for result in [*fetched_web_sources, *search_results]:
+        if result["url"] not in {source["url"] for source in sources}:
+            sources.append({**result, "type": result.get("type") or "web"})
+
+    answer_parts: list[str] = []
+    if brand_sources:
+        highlights = "; ".join(
+            f"{source['title'].split(' • ')[0]}: {source['snippet']}" for source in brand_sources[:2]
+        )
+        answer_parts.append(f"Dalle fonti ufficiali dei brand collegati emergono questi segnali utili: {highlights}.")
+
+    if product_candidates:
+        product_summary = ", ".join(
+            f"{product.get('name')} ({product.get('brand') or product.get('category') or 'catalogo Zenit'})"
+            for product in product_candidates
+        )
+        answer_parts.append(f"Nel catalogo Zenit vedo prodotti coerenti con la richiesta: {product_summary}.")
+
+    if fetched_web_sources or search_results:
+        web_summary = "; ".join(
+            f"{result['domain'] or result['title']}: {result['snippet']}" for result in ([*fetched_web_sources, *search_results])[:3]
+        )
+        answer_parts.append(f"Incrociando la ricerca web interna, i riferimenti piu vicini sono: {web_summary}.")
+
+    if not answer_parts:
+        answer_parts.append(
+            "Ho provato ad ampliare la risposta con la ricerca integrata, ma non ho trovato riferimenti abbastanza solidi. Conviene agganciare un brand con sito ufficiale o affinare meglio la richiesta tecnica."
+        )
+
+    return {
+        "answer": " ".join(answer_parts),
+        "sources": sources[:6],
+    }
 
 
 def get_current_user() -> dict[str, Any] | None:
@@ -681,6 +855,16 @@ def api_toggle_product_showcase(product_id: str) -> Any:
     db.execute("UPDATE products SET showcase = ? WHERE id = ?", (next_value, product_id))
     db.commit()
     return jsonify({"ok": True, "products": get_all_products()})
+
+
+@app.post("/api/assistant/research")
+def api_assistant_research() -> Any:
+    payload = request.get_json(silent=True) or {}
+    question = str(payload.get("question") or "").strip()
+    if not question:
+        return jsonify({"error": "Domanda mancante."}), 400
+    research = build_assistant_web_research(question, get_all_brands(), get_all_products())
+    return jsonify({"ok": True, **research})
 
 
 @app.post("/api/brands")

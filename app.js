@@ -220,11 +220,10 @@ function getUserRedirectTarget() {
 }
 
 function isAssistantWebModeEnabled() {
-  return localStorage.getItem(ASSISTANT_WEB_MODE_KEY) === "true";
+  return true;
 }
 
 function setAssistantWebModeEnabled(value) {
-  localStorage.setItem(ASSISTANT_WEB_MODE_KEY, value ? "true" : "false");
   syncAssistantAdminState();
 }
 
@@ -1471,6 +1470,13 @@ function setAssistantOpen(open) {
   if (!assistantToggle || !assistantPanel) return;
   assistantPanel.hidden = !open;
   assistantToggle.setAttribute("aria-expanded", String(open));
+  document.body.classList.toggle("assistant-open", open);
+  if (open) {
+    window.setTimeout(() => {
+      assistantMessages?.scrollTo({ top: assistantMessages.scrollHeight, behavior: "smooth" });
+      assistantInput?.scrollIntoView({ block: "nearest" });
+    }, 80);
+  }
 }
 
 function setCatalogNavOpen(open) {
@@ -1496,6 +1502,34 @@ function appendAssistantMessage(author, text, options = {}) {
 
   article.appendChild(title);
   article.appendChild(body);
+
+  if (Array.isArray(options.sources) && options.sources.length) {
+    const sourcesWrap = document.createElement("div");
+    sourcesWrap.className = "assistant-sources";
+
+    options.sources.forEach((source) => {
+      const link = document.createElement("a");
+      link.className = "assistant-source";
+      link.href = source.url || "#";
+      link.target = "_blank";
+      link.rel = "noreferrer";
+
+      const label = document.createElement("strong");
+      label.textContent = source.title || source.domain || "Fonte online";
+
+      const snippet = document.createElement("span");
+      snippet.textContent = source.snippet || source.domain || "";
+
+      link.appendChild(label);
+      if (snippet.textContent) {
+        link.appendChild(snippet);
+      }
+      sourcesWrap.appendChild(link);
+    });
+
+    article.appendChild(sourcesWrap);
+  }
+
   assistantMessages.appendChild(article);
   assistantMessages.scrollTop = assistantMessages.scrollHeight;
   return article;
@@ -1526,27 +1560,33 @@ function appendThinkingMessage() {
 }
 
 function syncAssistantAdminState() {
-  const adminEnabled = isAdminAuthenticated();
-  const webMode = adminEnabled && isAssistantWebModeEnabled();
+  const webMode = isAssistantWebModeEnabled();
 
   if (assistantAdminPanel) {
-    assistantAdminPanel.hidden = !adminEnabled;
+    assistantAdminPanel.hidden = true;
   }
 
   if (assistantWebModeToggle) {
     assistantWebModeToggle.checked = webMode;
-    assistantWebModeToggle.disabled = !adminEnabled;
+    assistantWebModeToggle.disabled = true;
   }
 
   if (assistantStatusCopy) {
     assistantStatusCopy.textContent = webMode
-      ? "AI settoriale + fallback Google"
+      ? "AI settoriale + ricerca web attiva"
       : "AI settoriale Zenit attiva";
   }
 }
 
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function syncAssistantViewportMetrics() {
+  const visualHeight = window.visualViewport?.height || window.innerHeight;
+  const offsetTop = window.visualViewport?.offsetTop || 0;
+  document.documentElement.style.setProperty("--assistant-viewport-height", `${Math.max(visualHeight, 320)}px`);
+  document.documentElement.style.setProperty("--assistant-viewport-offset-top", `${Math.max(offsetTop, 0)}px`);
 }
 
 function updateAssistantConversationState(nextState = {}) {
@@ -1718,6 +1758,47 @@ function searchGoogle(queryText) {
   if (!popup) {
     window.location.href = url;
   }
+}
+
+function shouldTriggerAssistantWebResearch(question, response) {
+  if (!isAssistantWebModeEnabled()) return false;
+  const q = normalizeText(question);
+  const intent = response?.meta?.lastIntent || "";
+  if (/(greeting|identity|company-contact|contact|cart|showcase)/.test(intent)) return false;
+  if (intent === "web-search") return true;
+  if (q.split(" ").length >= 5) return true;
+  return /(brand|marchio|marca|attrezz|attrezzi|attrezzature|strument|equip|scheda tecnica|manuale|catalogo brand|produttore|modello|certificazione|atex|anticaduta|guanti|maschera|imbracatura|rilevatore|calzature)/.test(q);
+}
+
+async function performAssistantWebResearch(question) {
+  const payload = await apiFetch("/api/assistant/research", {
+    method: "POST",
+    body: JSON.stringify({ question })
+  });
+  return {
+    text: payload.answer || "Ho completato la ricerca interna, ma non ho raccolto abbastanza elementi solidi.",
+    sources: Array.isArray(payload.sources) ? payload.sources : []
+  };
+}
+
+function getAssistantThinkingDelay(question, phase = "primary") {
+  const q = normalizeText(question);
+  const words = q.split(" ").filter(Boolean);
+  let complexity = words.length * 120;
+
+  if (/(confronta|differenza|approfondisci|spiegami|certificazioni|atex|spazi confinati|petrolchimico|preventivo|fornitura|brand|marchio|attrezz)/.test(q)) {
+    complexity += 1200;
+  }
+
+  if (words.length >= 12) {
+    complexity += 1200;
+  }
+
+  if (phase === "research") {
+    complexity += 900;
+  }
+
+  return Math.max(1200, Math.min(phase === "research" ? 5200 : 3800, complexity));
 }
 
 function normalizeText(value) {
@@ -2496,11 +2577,11 @@ function answerAssistantQuestion(question) {
     };
   }
 
-  if (isAdminAuthenticated() && isAssistantWebModeEnabled()) {
+  if (isAssistantWebModeEnabled()) {
     return {
-      text: "Nella conoscenza interna di Zenit non ho trovato una risposta abbastanza solida. Attivo una ricerca Google in nuova scheda per ampliare il contesto.",
-      action: () => searchGoogle(question),
-      meta: { lastIntent: "web-search", lastQuestion: question }
+      text: "Nella conoscenza interna di Zenit non ho trovato una risposta abbastanza solida. Avvio una ricerca web integrata dentro Carlo 2.0, senza farti uscire dal sito.",
+      action: null,
+      meta: { lastIntent: "web-search", lastQuestion: question, webResearchQuery: question }
     };
   }
 
@@ -2803,6 +2884,15 @@ assistantClose?.addEventListener("click", () => {
   setAssistantOpen(false);
 });
 
+assistantInput?.addEventListener("focus", () => {
+  setAssistantOpen(true);
+  syncAssistantViewportMetrics();
+  window.setTimeout(() => {
+    assistantInput?.scrollIntoView({ block: "nearest" });
+    assistantMessages?.scrollTo({ top: assistantMessages.scrollHeight, behavior: "smooth" });
+  }, 220);
+});
+
 assistantSuggestions?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-assistant-action]");
   if (!button) return;
@@ -2810,17 +2900,8 @@ assistantSuggestions?.addEventListener("click", (event) => {
 });
 
 assistantWebModeToggle?.addEventListener("change", (event) => {
-  if (!isAdminAuthenticated()) {
-    event.target.checked = false;
-    return;
-  }
-  setAssistantWebModeEnabled(event.target.checked);
-  appendAssistantMessage(
-    "bot",
-    event.target.checked
-      ? "Modalita ricerca web attivata. Quando la mia conoscenza settoriale interna non basta, apro una ricerca Google di supporto."
-      : "Modalita ricerca web disattivata. Carlo 2.0 resta focalizzato solo sulla conoscenza settoriale interna di Zenit."
-  );
+  event.target.checked = true;
+  setAssistantWebModeEnabled(true);
 });
 
 assistantForm?.addEventListener("submit", async (event) => {
@@ -2833,7 +2914,7 @@ assistantForm?.addEventListener("submit", async (event) => {
   assistantInput.blur();
 
   const thinkingMessage = appendThinkingMessage();
-  await wait(3000);
+  await wait(getAssistantThinkingDelay(question, "primary"));
   thinkingMessage?.remove();
 
   const response = answerAssistantQuestion(question);
@@ -2842,6 +2923,26 @@ assistantForm?.addEventListener("submit", async (event) => {
     lastQuestion: question,
     ...(response.meta || {})
   });
+
+  if (response?.meta?.webResearchQuery || shouldTriggerAssistantWebResearch(question, response)) {
+    const researchThinkingMessage = appendThinkingMessage();
+    await wait(getAssistantThinkingDelay(question, "research"));
+    try {
+      const research = await performAssistantWebResearch(response?.meta?.webResearchQuery || question);
+      researchThinkingMessage?.remove();
+      appendAssistantMessage("bot", research.text, { sources: research.sources, extraClassName: "assistant-message--research" });
+      updateAssistantConversationState({
+        lastIntent: "web-research-result",
+        lastQuestion: question
+      });
+    } catch (error) {
+      researchThinkingMessage?.remove();
+      appendAssistantMessage(
+        "bot",
+        error.message || "Ho provato la ricerca integrata, ma in questo momento non riesco a completarla dal web."
+      );
+    }
+  }
 
   if (typeof response.action === "function") {
     window.setTimeout(() => {
@@ -2911,6 +3012,9 @@ document.addEventListener("keydown", (event) => {
 
 window.addEventListener("scroll", syncScrollChrome, { passive: true });
 window.addEventListener("resize", syncScrollChrome);
+window.addEventListener("resize", syncAssistantViewportMetrics);
+window.visualViewport?.addEventListener("resize", syncAssistantViewportMetrics);
+window.visualViewport?.addEventListener("scroll", syncAssistantViewportMetrics);
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver(
@@ -2944,6 +3048,7 @@ if ("IntersectionObserver" in window) {
 }
 
 syncScrollChrome();
+syncAssistantViewportMetrics();
 setAssistantOpen(false);
 hydrateAdminCategorySelects();
 bootstrapApp().catch((error) => {
