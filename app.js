@@ -3,6 +3,7 @@ const BRANDS_KEY = "zenit-admin-brands";
 const CART_KEY = "zenit-cart";
 const ADMIN_AUTH_KEY = "zenit-admin-auth";
 const ASSISTANT_WEB_MODE_KEY = "zenit-assistant-web-mode";
+const ASSISTANT_OPEN_STATE_KEY = "zenit-assistant-open";
 const USERS_KEY = "zenit-site-users";
 const USER_AUTH_KEY = "zenit-site-user-auth";
 const ORDERS_KEY = "zenit-site-orders";
@@ -225,6 +226,22 @@ function isAssistantWebModeEnabled() {
 
 function setAssistantWebModeEnabled(value) {
   syncAssistantAdminState();
+}
+
+function getAssistantStoredOpenState() {
+  try {
+    return sessionStorage.getItem(ASSISTANT_OPEN_STATE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function setAssistantStoredOpenState(value) {
+  try {
+    sessionStorage.setItem(ASSISTANT_OPEN_STATE_KEY, String(Boolean(value)));
+  } catch {
+    // no-op
+  }
 }
 
 function getBackendAccessMessage() {
@@ -1468,10 +1485,14 @@ function animateCountUp(element) {
 
 function setAssistantOpen(open) {
   if (!assistantToggle || !assistantPanel) return;
-  assistantPanel.hidden = !open;
-  assistantToggle.setAttribute("aria-expanded", String(open));
-  document.body.classList.toggle("assistant-open", open);
-  if (open) {
+  const isOpen = Boolean(open);
+  assistantPanel.hidden = !isOpen;
+  assistantPanel.setAttribute("aria-hidden", String(!isOpen));
+  assistantPanel.classList.toggle("is-open", isOpen);
+  assistantToggle.setAttribute("aria-expanded", String(isOpen));
+  document.body.classList.toggle("assistant-open", isOpen);
+  setAssistantStoredOpenState(isOpen);
+  if (isOpen) {
     window.setTimeout(() => {
       assistantMessages?.scrollTo({ top: assistantMessages.scrollHeight, behavior: "smooth" });
       assistantInput?.scrollIntoView({ block: "nearest" });
@@ -3049,7 +3070,7 @@ if ("IntersectionObserver" in window) {
 
 syncScrollChrome();
 syncAssistantViewportMetrics();
-setAssistantOpen(false);
+setAssistantOpen(getAssistantStoredOpenState());
 hydrateAdminCategorySelects();
 bootstrapApp().catch((error) => {
   console.error(error);

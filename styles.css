@@ -2877,6 +2877,10 @@ body.modal-open {
   max-height: min(720px, calc(var(--assistant-viewport-height, 100vh) - 92px));
 }
 
+.assistant-panel[hidden] {
+  display: none !important;
+}
+
 .assistant-panel::before {
   content: "";
   position: absolute;
