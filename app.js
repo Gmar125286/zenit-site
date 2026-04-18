@@ -2885,7 +2885,7 @@ assistantClose?.addEventListener("click", () => {
 });
 
 assistantInput?.addEventListener("focus", () => {
-  setAssistantOpen(true);
+  if (assistantPanel?.hidden) return;
   syncAssistantViewportMetrics();
   window.setTimeout(() => {
     assistantInput?.scrollIntoView({ block: "nearest" });
