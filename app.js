@@ -762,16 +762,18 @@ function renderAdminBrands() {
           <div class="admin-brand-row__copy">
             <strong>${brand.name}</strong>
             <p>${brand.label || "Partner tecnico Zenit"}</p>
-            ${
-              brand.website
-                ? `<a class="admin-brand-row__link" href="${brand.website}" target="_blank" rel="noreferrer">Sito ufficiale</a>`
-                : ""
-            }
-            ${
-              brand.email
-                ? `<span class="admin-brand-row__notes">Email collegata: ${brand.email}</span>`
-                : ""
-            }
+            <div class="admin-brand-row__meta">
+              ${
+                brand.website
+                  ? `<a class="admin-brand-row__link" href="${brand.website}" target="_blank" rel="noreferrer">Sito ufficiale</a>`
+                  : ""
+              }
+              ${
+                brand.email
+                  ? `<span class="admin-brand-row__mini">Email collegata</span>`
+                  : ""
+              }
+            </div>
             ${
               brand.notes
                 ? `<span class="admin-brand-row__notes">${brand.notes}</span>`
