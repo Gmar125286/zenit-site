@@ -26,6 +26,13 @@ const closeCart = document.querySelector("#close-cart");
 const cartCheckoutButton = document.querySelector("#cart-checkout-button");
 const backdrop = document.querySelector("#backdrop");
 const heroProductCount = document.querySelector("#hero-product-count");
+const heroProductCountInline = document.querySelector("#hero-product-count-inline");
+const heroCatalogEmpty = document.querySelector("#hero-catalog-empty");
+const heroCatalogProduct = document.querySelector("#hero-catalog-product");
+const heroProductImage = document.querySelector("#hero-product-image");
+const heroProductName = document.querySelector("#hero-product-name");
+const heroProductSubtitle = document.querySelector("#hero-product-subtitle");
+const heroProductMeta = document.querySelector("#hero-product-meta");
 const adminForm = document.querySelector("#admin-form");
 const brandForm = document.querySelector("#brand-form");
 const adminProductList = document.querySelector("#admin-product-list");
@@ -856,6 +863,62 @@ function renderProducts() {
   });
 }
 
+function renderHeroCatalogPreview() {
+  if (!heroProductCount && !heroCatalogProduct) return;
+
+  const showcaseProducts = getHomepageProducts();
+  const totalPublished = products.length;
+  const featuredProduct = showcaseProducts[0] || products[0] || null;
+
+  if (heroProductCount) {
+    heroProductCount.textContent = String(totalPublished);
+  }
+
+  if (heroProductCountInline) {
+    heroProductCountInline.textContent = String(totalPublished);
+  }
+
+  if (!heroCatalogEmpty || !heroCatalogProduct || !featuredProduct) {
+    if (heroCatalogEmpty) {
+      heroCatalogEmpty.hidden = false;
+    }
+    if (heroCatalogProduct) {
+      heroCatalogProduct.hidden = true;
+    }
+    return;
+  }
+
+  heroCatalogEmpty.hidden = true;
+  heroCatalogProduct.hidden = false;
+
+  if (heroProductImage) {
+    heroProductImage.src = getProductImageSource(featuredProduct);
+    heroProductImage.alt = featuredProduct.name || "Prodotto Zenit";
+    heroProductImage.onerror = () => {
+      heroProductImage.onerror = null;
+      heroProductImage.src = createPlaceholderImage(featuredProduct.name);
+    };
+  }
+
+  if (heroProductMeta) {
+    heroProductMeta.textContent = [featuredProduct.brand || "Zenit", featuredProduct.category || "Catalogo"]
+      .filter(Boolean)
+      .join(" • ");
+  }
+
+  if (heroProductName) {
+    heroProductName.textContent = featuredProduct.name || "Prodotto in evidenza";
+  }
+
+  if (heroProductSubtitle) {
+    heroProductSubtitle.textContent =
+      featuredProduct.subtitle ||
+      featuredProduct.subcategory ||
+      featuredProduct.description ||
+      "Prodotto disponibile nel catalogo dinamico Zenit.";
+  }
+}
+
 function renderAdminList() {
   if (!adminProductCount || !adminProductList) return;
 
@@ -1265,6 +1328,7 @@ function refreshAll() {
   renderBrands();
   renderFilters();
   renderProducts();
+  renderHeroCatalogPreview();
   renderOrdersPage();
   renderAdminOrders();
   renderAdminList();
