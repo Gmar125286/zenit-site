@@ -122,6 +122,8 @@ let assistantConversationState = {
   lastQuestion: ""
 };
 let lastScrollTop = 0;
+let headerRetracted = false;
+let scrollChromeFrame = null;
 
 function isAdminAuthenticated() {
   return adminAuthenticated;
@@ -1758,8 +1760,7 @@ function syncScrollChrome() {
   const scrollTop = window.scrollY || window.pageYOffset;
   const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
   const progress = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0;
-  const scrollingDown = scrollTop > lastScrollTop + 8;
-  const scrollingUp = scrollTop < lastScrollTop - 8;
+  const scrollDelta = scrollTop - lastScrollTop;
 
   if (scrollProgressBar) {
     scrollProgressBar.style.width = `${progress}%`;
@@ -1767,16 +1768,28 @@ function syncScrollChrome() {
 
   if (mainHeader) {
     mainHeader.classList.toggle("is-condensed", scrollTop > 18);
-    if (scrollTop <= 24) {
-      mainHeader.classList.remove("is-retracted");
-    } else if (scrollingDown && scrollTop > 120) {
-      mainHeader.classList.add("is-retracted");
-    } else if (scrollingUp) {
-      mainHeader.classList.remove("is-retracted");
+
+    if (scrollTop <= 32) {
+      headerRetracted = false;
+    } else if (!headerRetracted && scrollDelta > 10 && scrollTop > 180) {
+      headerRetracted = true;
+    } else if (headerRetracted && scrollDelta < -10) {
+      headerRetracted = false;
     }
+
+    mainHeader.classList.toggle("is-retracted", headerRetracted);
   }
 
   lastScrollTop = Math.max(scrollTop, 0);
+}
+
+function requestScrollChromeSync() {
+  if (scrollChromeFrame !== null) return;
+
+  scrollChromeFrame = window.requestAnimationFrame(() => {
+    scrollChromeFrame = null;
+    syncScrollChrome();
+  });
 }
 
 function animateCountUp(element) {
@@ -3304,7 +3317,7 @@ document.addEventListener("keydown", (event) => {
   closeProductInfoModal();
 });
 
-window.addEventListener("scroll", syncScrollChrome, { passive: true });
+window.addEventListener("scroll", requestScrollChromeSync, { passive: true });
 window.addEventListener("resize", syncScrollChrome);
 window.addEventListener("resize", syncAssistantViewportMetrics);
 window.visualViewport?.addEventListener("resize", syncAssistantViewportMetrics);

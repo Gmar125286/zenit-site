@@ -140,9 +140,8 @@ img {
   align-items: center;
   overflow: hidden;
   transition:
-    opacity 220ms ease,
-    transform 220ms ease,
-    filter 220ms ease;
+    opacity 260ms ease,
+    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform, opacity;
 }
 
@@ -167,10 +166,10 @@ img {
   background: #fff;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.045);
   transition:
-    opacity 220ms ease,
+    opacity 260ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease,
-    transform 180ms ease;
+    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
   overflow: hidden;
   will-change: transform, opacity;
 }
@@ -201,15 +200,13 @@ img {
 
 .main-header.is-retracted .logo-block {
   opacity: 0;
-  transform: translateY(-12px);
-  filter: blur(3px);
+  transform: translateY(-10px);
   pointer-events: none;
 }
 
 .main-header.is-retracted .search-shell {
   opacity: 0;
-  transform: translateY(-12px);
-  filter: blur(3px);
+  transform: translateY(-10px);
   pointer-events: none;
 }
 
