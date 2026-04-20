@@ -121,6 +121,7 @@ let assistantConversationState = {
   lastSuggestedCategories: [],
   lastQuestion: ""
 };
+let lastScrollTop = 0;
 
 function isAdminAuthenticated() {
   return adminAuthenticated;
@@ -1757,6 +1758,8 @@ function syncScrollChrome() {
   const scrollTop = window.scrollY || window.pageYOffset;
   const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
   const progress = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0;
+  const scrollingDown = scrollTop > lastScrollTop + 8;
+  const scrollingUp = scrollTop < lastScrollTop - 8;
 
   if (scrollProgressBar) {
     scrollProgressBar.style.width = `${progress}%`;
@@ -1764,7 +1767,16 @@ function syncScrollChrome() {
 
   if (mainHeader) {
     mainHeader.classList.toggle("is-condensed", scrollTop > 18);
+    if (scrollTop <= 24) {
+      mainHeader.classList.remove("is-retracted");
+    } else if (scrollingDown && scrollTop > 120) {
+      mainHeader.classList.add("is-retracted");
+    } else if (scrollingUp) {
+      mainHeader.classList.remove("is-retracted");
+    }
   }
+
+  lastScrollTop = Math.max(scrollTop, 0);
 }
 
 function animateCountUp(element) {

@@ -134,9 +134,17 @@ img {
 }
 
 .logo-block {
+  flex: 0 0 auto;
   min-width: 250px;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    min-width 220ms ease,
+    width 220ms ease,
+    margin 220ms ease;
 }
 
 .logo-image {
@@ -147,11 +155,12 @@ img {
 }
 
 .search-shell {
-  flex: 1;
+  flex: 1 1 420px;
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 240px;
+  max-width: 100%;
   padding: 0 16px;
   height: 56px;
   border: 1px solid #dfe9e2;
@@ -159,9 +168,16 @@ img {
   background: #fff;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.045);
   transition:
+    opacity 220ms ease,
+    max-width 220ms ease,
+    min-width 220ms ease,
+    padding 220ms ease,
+    margin 220ms ease,
+    border-width 220ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+  overflow: hidden;
 }
 
 .search-shell:focus-within {
@@ -186,6 +202,29 @@ img {
 
 .header-cta {
   gap: 16px;
+}
+
+.main-header.is-retracted .logo-block {
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(-12px) scale(0.96);
+  pointer-events: none;
+}
+
+.main-header.is-retracted .search-shell {
+  flex: 0 1 0;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border-width: 0;
+  opacity: 0;
+  transform: translateY(-12px);
+  box-shadow: none;
+  pointer-events: none;
 }
 
 .user-session {
