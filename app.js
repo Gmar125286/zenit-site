@@ -2627,7 +2627,7 @@ function answerAssistantQuestion(question) {
   if (/(dove si trova zenit|dove siete|sede zenit|indirizzo zenit|contatti zenit)/.test(q)) {
     return {
       text: `${knowledge.company.name} ha sede in ${knowledge.company.location}. I riferimenti principali sono ${knowledge.contacts[0]}, ${knowledge.contacts[1]}, ${knowledge.contacts[2]} e ${knowledge.contacts[3]}. ${knowledge.company.vat}.`,
-      action: () => handleAssistantAction("contact"),
+      action: null,
       meta: { lastIntent: "company-contact", lastQuestion: question, lastNeedProfile: needProfile }
     };
   }
@@ -2642,40 +2642,40 @@ function answerAssistantQuestion(question) {
 
   if (/(preventivo|offerta|quotazione|costo fornitura|richiesta)/.test(q)) {
     return {
-      text: `Posso portarti subito alla sezione preventivi. Per farla bene e farti risparmiare tempo, conviene indicare settore, quantitativi, urgenza, categoria prodotto e contesto operativo.${needProfile.quantity === "team" ? " Dalla tua richiesta sembra esserci una fornitura per piu operatori, quindi e utile specificare anche numero persone e continuita della fornitura." : ""}`,
-      action: () => handleAssistantAction("quote"),
+      text: `Per richiedere un preventivo in modo efficace conviene indicare settore, quantitativi, urgenza, categoria prodotto e contesto operativo.${needProfile.quantity === "team" ? " Dalla tua richiesta sembra esserci una fornitura per piu operatori, quindi e utile specificare anche numero persone e continuita della fornitura." : ""}`,
+      action: null,
       meta: { lastIntent: "quote", lastQuestion: question, lastNeedProfile: needProfile }
     };
   }
 
   if (/(contatti|telefono|email|mail|indirizzo|dove siete)/.test(q)) {
     return {
-      text: `Puoi contattare Zenit via commerciale@zenitsrl.it oppure ai numeri ${knowledge.contacts[0]} e ${knowledge.contacts[1]}. Se vuoi, ti porto direttamente ai contatti.`,
-      action: () => handleAssistantAction("contact"),
+      text: `Puoi contattare Zenit via commerciale@zenitsrl.it oppure ai numeri ${knowledge.contacts[0]} e ${knowledge.contacts[1]}. Se vuoi, posso anche dirti come formulare una richiesta commerciale o tecnica in modo piu efficace.`,
+      action: null,
       meta: { lastIntent: "contact", lastQuestion: question }
     };
   }
 
   if (/(carrello|ordine|acquisto)/.test(q)) {
     return {
-      text: "Posso aprire subito il carrello, cosi controlli i prodotti gia selezionati oppure continui ad aggiungerne dal catalogo.",
-      action: () => handleAssistantAction("cart"),
+      text: "Posso aiutarti a capire cosa inserire nel carrello, come comporre una richiesta ordine o quali prodotti confrontare prima dell'acquisto.",
+      action: null,
       meta: { lastIntent: "cart", lastQuestion: question }
     };
   }
 
   if (/(catalogo|tutti i prodotti|prodotti completi|assortimento)/.test(q)) {
     return {
-      text: "Ti porto nel catalogo completo, dove puoi vedere tutto l'assortimento Zenit e filtrare per categoria o ricerca libera.",
-      action: () => handleAssistantAction("catalog"),
+      text: "Il catalogo completo Zenit raccoglie l'intero assortimento. Se vuoi, posso aiutarti a restringerlo per categoria, microcategoria, rischio, settore o brand senza farti navigare a tentoni.",
+      action: null,
       meta: { lastIntent: "catalog", lastQuestion: question }
     };
   }
 
   if (/(home|vetrina|in evidenza|prodotti evidenza)/.test(q)) {
     return {
-      text: "Posso portarti alla vetrina della homepage, dove Zenit mostra solo i prodotti selezionati in evidenza.",
-      action: () => handleAssistantAction("showcase"),
+      text: "La vetrina homepage mostra solo i prodotti messi in evidenza. Se vuoi, posso spiegarti quali famiglie prodotto hanno piu senso da mettere in risalto in base al tipo di cliente.",
+      action: null,
       meta: { lastIntent: "showcase", lastQuestion: question }
     };
   }
@@ -2702,8 +2702,7 @@ function answerAssistantQuestion(question) {
     if (matchedSector) {
       return {
         text: `${matchedSector.label}: ${matchedSector.profile} In questo settore Carlo 2.0 tende a partire da ${matchedSector.priorities.join(", ")}. Le famiglie prodotto piu coerenti sono ${matchedSector.recommendedCategories.join(", ")}. Per orientarti meglio ti chiederei: ${matchedSector.questions.join(" ")}`,
-        action: () => handleAssistantAction("catalog")
-        ,
+        action: null,
         meta: {
           lastIntent: "sector",
           lastSector: matchedSectorEntry[0],
@@ -2741,7 +2740,7 @@ function answerAssistantQuestion(question) {
         matchedKnowledgeCategory,
         matchedMicrocategory
       }),
-      action: needProfile.suggestedCategories.length ? () => handleAssistantAction("catalog") : null,
+      action: null,
       meta: {
         lastIntent: "consultative-advice",
         lastSector: needProfile.detectedSectorKey,
@@ -2758,18 +2757,7 @@ function answerAssistantQuestion(question) {
     const references = buildReferenceLine(matchedMicrocategory.category.references);
     return {
       text: `Se stiamo parlando di ${matchedMicrocategory.microcategory}, io la leggerei cosi: ${matchedMicrocategory.description} Fa parte dell'area ${matchedMicrocategory.category.label}. Se vuoi, nel passo successivo posso anche dirti quando conviene sceglierla, con cosa abbinarla e in quale settore la vedo piu spesso.${references}`,
-      action: matchedMicrocategory.category.catalogCategory
-        ? () => {
-            if (currentPage === "catalog") {
-              activeCategory = matchedMicrocategory.category.catalogCategory;
-              renderFilters();
-              renderProducts();
-              document.querySelector("#featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else {
-              window.location.href = `catalogo.html?categoria=${encodeURIComponent(matchedMicrocategory.category.catalogCategory)}`;
-            }
-          }
-        : null,
+      action: null,
       meta: {
         lastIntent: "microcategory",
         lastCategory: matchedMicrocategory.category.catalogCategory,
@@ -2781,10 +2769,9 @@ function answerAssistantQuestion(question) {
   }
 
   if (matchedSector) {
-    return {
-      text: `Per il settore ${matchedSector.label}, Zenit lavora con un approccio consulenziale: ${matchedSector.profile} Di solito le priorita sono ${matchedSector.priorities.join(", ")} e le famiglie prodotto piu adatte sono ${matchedSector.recommendedCategories.join(", ")}. Se vuoi, ti porto nel catalogo per iniziare da li.`,
-      action: () => handleAssistantAction("catalog")
-      ,
+      return {
+        text: `Per il settore ${matchedSector.label}, Zenit lavora con un approccio consulenziale: ${matchedSector.profile} Di solito le priorita sono ${matchedSector.priorities.join(", ")} e le famiglie prodotto piu adatte sono ${matchedSector.recommendedCategories.join(", ")}. Se vuoi, posso anche dirti con quale categoria partire prima.`,
+      action: null,
       meta: {
         lastIntent: "sector",
         lastSector: matchedSectorEntry[0],
@@ -2802,18 +2789,7 @@ function answerAssistantQuestion(question) {
     const references = buildReferenceLine(matchedKnowledgeCategory.references);
     return {
       text: `Su ${matchedKnowledgeCategory.label} ti orienterei cosi: e l'area Zenit dedicata a ${matchedKnowledgeCategory.focus}. Dentro trovi microcategorie come ${matchedKnowledgeCategory.microcategories.join(", ")}.${standards}${references} Se mi dici il rischio o il settore, posso restringere subito il campo invece di lasciarti davanti a un elenco generico.`,
-      action: matchedKnowledgeCategory.catalogCategory
-        ? () => {
-            if (currentPage === "catalog") {
-              activeCategory = matchedKnowledgeCategory.catalogCategory;
-              renderFilters();
-              renderProducts();
-              document.querySelector("#featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else {
-              window.location.href = `catalogo.html?categoria=${encodeURIComponent(matchedKnowledgeCategory.catalogCategory)}`;
-            }
-          }
-        : null,
+      action: null,
       meta: {
         lastIntent: "category",
         lastCategory: matchedKnowledgeCategory.catalogCategory,
@@ -2830,17 +2806,7 @@ function answerAssistantQuestion(question) {
           ? "Posso filtrarti subito il catalogo su questa categoria."
           : "Ti posso portare nel catalogo completo gia orientato su questa categoria."
       }`,
-      action: () => {
-        if (currentPage === "catalog") {
-          activeCategory = matchedCategory;
-          renderFilters();
-          renderProducts();
-          document.querySelector("#featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          window.location.href = `catalogo.html?categoria=${encodeURIComponent(matchedCategory)}`;
-        }
-      }
-      ,
+      action: null,
       meta: {
         lastIntent: "category",
         lastCategory: matchedCategory,
@@ -2858,10 +2824,10 @@ function answerAssistantQuestion(question) {
     return {
       text: `Ho trovato questi prodotti pertinenti nel sito: ${topProducts}. ${
         currentPage === "catalog"
-          ? "Se vuoi, resta qui e usa la ricerca per restringere ancora."
-          : "Se vuoi vedere tutti i risultati, ti porto nel catalogo completo."
+          ? "Se vuoi, posso aiutarti a capire quale di questi guardare per primo."
+          : "Se vuoi, posso aiutarti a capire quale di questi guardare per primo."
       }`,
-      action: currentPage === "catalog" ? null : () => handleAssistantAction("catalog"),
+      action: null,
       meta: { lastIntent: "products", lastQuestion: question, lastNeedProfile: needProfile }
     };
   }
@@ -2875,7 +2841,7 @@ function answerAssistantQuestion(question) {
           ? `Se vuoi, posso guidarti partendo proprio da ${targetMicro}, spiegandoti differenze, contesto d'uso e prodotti da guardare per primi.`
           : `Se vuoi, posso restringere subito il catalogo sulla famiglia prodotto piu coerente e poi capire se ti serve una fornitura singola o per squadra.`
       }`,
-      action: targetCategory?.catalogCategory ? () => handleAssistantAction("catalog") : null,
+      action: null,
       meta: {
         lastIntent: "supply-request",
         lastCategory: targetCategory?.catalogCategory || null,
@@ -2896,7 +2862,7 @@ function answerAssistantQuestion(question) {
       const email = featuredBrand.email ? ` Email collegata: ${featuredBrand.email}.` : "";
       return {
         text: `${featuredBrand.name}: ${featuredBrand.label || "brand partner presente nel sito."}${notes}${website}${email}`,
-        action: () => handleAssistantAction("catalog"),
+        action: null,
         meta: {
           lastIntent: "brand",
           lastBrand: featuredBrand.name,
@@ -2909,7 +2875,7 @@ function answerAssistantQuestion(question) {
     const topBrands = matchingBrands.slice(0, 3).map((brand) => brand.name).join(", ");
     return {
       text: `Ho trovato questi brand collegati alla tua richiesta: ${topBrands}. Se vuoi, posso accompagnarti nel catalogo per cercare i prodotti associati o aiutarti a capire quale brand e piu coerente col contesto operativo.`,
-      action: () => handleAssistantAction("catalog"),
+      action: null,
       meta: { lastIntent: "brands", lastQuestion: question, lastNeedProfile: needProfile }
     };
   }
@@ -2937,59 +2903,33 @@ function handleAssistantAction(action) {
       appendAssistantMessage("user", "Vorrei vedere il catalogo completo.");
       appendAssistantMessage(
         "bot",
-        currentPage === "catalog"
-          ? "Sei gia nel catalogo completo. Usa i filtri in alto per restringere la categoria giusta."
-          : "Ti porto nel catalogo completo, dove puoi vedere tutti i prodotti e filtrare per categoria."
+        "Posso aiutarti a leggere il catalogo in modo piu intelligente: dimmi categoria, rischio, settore o brand e restringiamo subito il campo."
       );
-      if (currentPage === "catalog") {
-        document.querySelector("#featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.location.href = "catalogo.html";
-      }
     },
     quote() {
       appendAssistantMessage("user", "Ho bisogno di un preventivo.");
       appendAssistantMessage(
         "bot",
-        currentPage === "home"
-          ? "Perfetto. Ti accompagno alla sezione preventivi, cosi puoi inviare subito la richiesta."
-          : "Ti accompagno alla pagina principale, direttamente nella sezione preventivi."
+        "Perfetto. Per un preventivo utile servono almeno settore, quantitativi, urgenza e categoria prodotto. Se vuoi, posso aiutarti a impostare una richiesta completa."
       );
-      if (currentPage === "home") {
-        document.querySelector("#preventivo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        document.querySelector("#quote-name")?.focus();
-      } else {
-        window.location.href = "index.html#preventivo";
-      }
     },
     showcase() {
       appendAssistantMessage("user", "Mostrami la vetrina della home.");
       appendAssistantMessage(
         "bot",
-        currentPage === "home"
-          ? "Ti porto alla vetrina con i prodotti messi in evidenza da Zenit."
-          : "Ti riporto alla homepage, nella sezione vetrina."
+        "La vetrina della home serve a mettere in evidenza i prodotti strategici. Se vuoi, posso suggerirti quali famiglie hanno piu impatto da mettere in primo piano."
       );
-      if (currentPage === "home") {
-        document.querySelector("#featured")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        window.location.href = "index.html#featured";
-      }
     },
     contact() {
       appendAssistantMessage("user", "Mi servono i contatti.");
       appendAssistantMessage(
         "bot",
-        currentPage === "home"
-          ? "Ti porto ai contatti Zenit. Se vuoi, puoi anche scrivere subito a commerciale@zenitsrl.it."
-          : "Ti mostro i contatti presenti in fondo pagina. Se preferisci, puoi anche contattare commerciale@zenitsrl.it."
+        "Puoi scrivere a commerciale@zenitsrl.it oppure chiamare 099.4725984 e 099.4723444. Se vuoi, posso anche aiutarti a scrivere il messaggio."
       );
-      document.querySelector("#contatti")?.scrollIntoView({ behavior: "smooth", block: "start" });
     },
     cart() {
       appendAssistantMessage("user", "Apri il carrello.");
-      appendAssistantMessage("bot", "Apro il carrello, cosi puoi rivedere subito i prodotti selezionati.");
-      toggleCart(true);
+      appendAssistantMessage("bot", "Posso aiutarti a decidere cosa mettere nel carrello o come costruire una richiesta ordine piu precisa.");
     },
     sector() {
       appendAssistantMessage("user", "Voglio un consiglio per il mio settore.");
@@ -3290,11 +3230,6 @@ assistantForm?.addEventListener("submit", async (event) => {
     }
   }
 
-  if (!shouldRunIntegratedResearch && typeof response.action === "function") {
-    window.setTimeout(() => {
-      response.action();
-    }, isAssistantWebModeEnabled() ? 120 : 260);
-  }
 });
 
 if (heroSection) {
