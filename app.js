@@ -92,6 +92,16 @@ let productInfoModal = null;
 const PRODUCT_TAXONOMY = {
   Anticaduta: ["Imbracature base", "Imbracature professionali", "Kit completi", "Cordini", "Connettori", "Ancoraggi e linee vita"],
   Antinfortunistica: ["Testa", "Vista", "Udito", "Mani", "Vie respiratorie", "Monouso"],
+  "Protezione respiratoria": [
+    "Respiratori a filtro",
+    "Respiratori ad adduzione d'aria",
+    "Autorespiratori SCBA",
+    "Respiratori airline",
+    "Respiratori di emergenza e fuga",
+    "Maschere pieno facciale",
+    "Bombole e accessori",
+    "Sistemi di monitoraggio"
+  ],
   "Calzature e Abbigliamento": ["S1P", "S3", "Alte prestazioni", "Alta visibilita", "Tecnico da cantiere", "Multiprotezione"],
   "Prodotti ATEX": ["Rilevatori gas", "Monitoraggio", "Accessori certificati", "Illuminazione ATEX", "Strumentazione", "Dispositivi portatili"],
   "Spazi Confinati": ["Treppiedi e davit", "Recuperatori", "Kit evacuazione", "Comunicazione", "Ventilazione", "Illuminazione"],
