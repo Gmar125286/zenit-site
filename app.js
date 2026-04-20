@@ -115,6 +115,7 @@ let cart = loadCart();
 let users = loadUsers();
 let orders = loadOrders();
 let activeCategory = getInitialCategory();
+let activeSubcategory = getInitialSubcategory();
 let query = "";
 let currentUser = null;
 let adminAuthenticated = false;
@@ -146,7 +147,14 @@ function setAdminAuthenticated(value) {
 
 function getInitialCategory() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("categoria") || "Tutti";
+  const category = params.get("categoria") || "Tutti";
+  if (category === "ATEX") return "Prodotti ATEX";
+  return category;
+}
+
+function getInitialSubcategory() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("sottocategoria") || "";
 }
 
 function normalizeProduct(product) {
@@ -684,10 +692,11 @@ function renderHomepageShowcase(visibleProducts) {
 function filteredProducts(sourceProducts = products) {
   return sourceProducts.filter((product) => {
     const matchesCategory = activeCategory === "Tutti" || product.category === activeCategory;
+    const matchesSubcategory = !activeSubcategory || product.subcategory === activeSubcategory;
     const haystack =
       `${product.name} ${product.category} ${product.subcategory} ${product.brand} ${product.subtitle} ${product.description} ${product.tags.join(" ")}`
         .toLowerCase();
-    return matchesCategory && haystack.includes(query.toLowerCase());
+    return matchesCategory && matchesSubcategory && haystack.includes(query.toLowerCase());
   });
 }
 
@@ -902,6 +911,7 @@ function renderFilters() {
   const categories = getCategories();
   if (!categories.includes(activeCategory)) {
     activeCategory = "Tutti";
+    activeSubcategory = "";
   }
 
   categoryFilters.innerHTML = categories
@@ -3109,6 +3119,7 @@ categoryFilters?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-category]");
   if (!button) return;
   activeCategory = button.dataset.category;
+  activeSubcategory = "";
   renderFilters();
   renderProducts();
 });
