@@ -78,6 +78,7 @@ const brandIdField = document.querySelector("#brand-id");
 const brandSubmitButton = document.querySelector("#brand-submit-button");
 const brandCancelEditButton = document.querySelector("#brand-cancel-edit");
 const brandFormStatus = document.querySelector("#brand-form-status");
+let productInfoModal = null;
 
 const PRODUCT_TAXONOMY = {
   Anticaduta: ["Imbracature base", "Imbracature professionali", "Kit completi", "Cordini", "Connettori", "Ancoraggi e linee vita"],
@@ -585,6 +586,124 @@ function toggleCart(open) {
   backdrop.hidden = !open;
 }
 
+function ensureProductInfoModal() {
+  if (productInfoModal) return productInfoModal;
+
+  const modal = document.createElement("div");
+  modal.className = "product-info-modal";
+  modal.id = "product-info-modal";
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="product-info-modal__backdrop" data-close-product-info="true"></div>
+    <div class="product-info-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="product-info-title">
+      <button class="product-info-modal__close" type="button" aria-label="Chiudi scheda prodotto" data-close-product-info="true">&times;</button>
+      <div class="product-info-modal__media">
+        <img id="product-info-image" src="" alt="" loading="lazy" />
+      </div>
+      <div class="product-info-modal__content">
+        <div class="product-info-modal__eyebrow" id="product-info-eyebrow"></div>
+        <h3 id="product-info-title"></h3>
+        <p class="product-info-modal__subtitle" id="product-info-subtitle"></p>
+        <div class="product-info-modal__meta" id="product-info-meta"></div>
+        <p class="product-info-modal__description" id="product-info-description"></p>
+        <div class="product-info-modal__tags" id="product-info-tags"></div>
+        <div class="product-info-modal__footer">
+          <strong id="product-info-price"></strong>
+          <button class="primary-button" type="button" id="product-info-add-to-cart">Aggiungi al carrello</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-product-info='true']")) {
+      closeProductInfoModal();
+    }
+  });
+
+  modal.querySelector("#product-info-add-to-cart")?.addEventListener("click", () => {
+    const productId = modal.dataset.productId;
+    if (!productId) return;
+    addToCart(productId);
+    closeProductInfoModal();
+  });
+
+  productInfoModal = modal;
+  return modal;
+}
+
+function closeProductInfoModal() {
+  const modal = ensureProductInfoModal();
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden", "true");
+  modal.dataset.productId = "";
+  document.body.classList.remove("modal-open");
+}
+
+function openProductInfoModal(productId) {
+  const product = getProductById(productId);
+  if (!product) return;
+
+  const modal = ensureProductInfoModal();
+  modal.dataset.productId = product.id;
+
+  const image = modal.querySelector("#product-info-image");
+  const eyebrow = modal.querySelector("#product-info-eyebrow");
+  const title = modal.querySelector("#product-info-title");
+  const subtitle = modal.querySelector("#product-info-subtitle");
+  const meta = modal.querySelector("#product-info-meta");
+  const description = modal.querySelector("#product-info-description");
+  const tags = modal.querySelector("#product-info-tags");
+  const price = modal.querySelector("#product-info-price");
+
+  if (image) {
+    image.src = product.image || createPlaceholderImage(product.name);
+    image.alt = product.name;
+  }
+
+  if (eyebrow) {
+    eyebrow.textContent = [product.brand || "Zenit", product.category || "Catalogo"].filter(Boolean).join(" • ");
+  }
+
+  if (title) {
+    title.textContent = product.name || "Scheda prodotto";
+  }
+
+  if (subtitle) {
+    subtitle.textContent = product.subtitle || product.subcategory || "Soluzione professionale disponibile nel catalogo Zenit.";
+  }
+
+  if (meta) {
+    meta.innerHTML = `
+      ${product.category ? `<span>${product.category}</span>` : ""}
+      ${product.subcategory ? `<span>${product.subcategory}</span>` : ""}
+      ${product.brand ? `<span>${product.brand}</span>` : ""}
+    `;
+  }
+
+  if (description) {
+    description.textContent =
+      product.description ||
+      "Prodotto presente nel catalogo Zenit. Contattaci per dettagli tecnici, disponibilita e configurazione piu adatta.";
+  }
+
+  if (tags) {
+    tags.innerHTML = Array.isArray(product.tags) && product.tags.length
+      ? product.tags.map((tag) => `<span>${tag}</span>`).join("")
+      : "<span>Catalogo Zenit</span>";
+  }
+
+  if (price) {
+    price.textContent = formatPrice(product.price || 0);
+  }
+
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
 function syncCartWithProducts() {
   const productIds = new Set(products.map((product) => product.id));
   cart = cart.filter((entry) => productIds.has(entry.id));
@@ -698,7 +817,7 @@ function renderProducts() {
           <span class="product-request">${product.subcategory || product.category || "Catalogo"}</span>
           <strong class="product-price">${formatPrice(product.price || 0)}</strong>
           <div class="product-actions">
-            <button class="ghost-button" type="button">${product.description ? "Info prodotto" : "Dettagli"}</button>
+            <button class="ghost-button" type="button" data-product-info="${product.id}">${product.description ? "Info prodotto" : "Dettagli"}</button>
             <button class="primary-button add-to-cart" type="button" data-id="${product.id}">Aggiungi al carrello</button>
           </div>
         </article>
@@ -2701,6 +2820,12 @@ searchInput?.addEventListener("input", (event) => {
 });
 
 productGrid?.addEventListener("click", (event) => {
+  const infoButton = event.target.closest("[data-product-info]");
+  if (infoButton) {
+    openProductInfoModal(infoButton.dataset.productInfo);
+    return;
+  }
+
   const button = event.target.closest(".add-to-cart");
   if (!button) return;
   addToCart(button.dataset.id);
@@ -3029,6 +3154,7 @@ document.addEventListener("keydown", (event) => {
   setCatalogNavOpen(false);
   toggleCart(false);
   setAssistantOpen(false);
+  closeProductInfoModal();
 });
 
 window.addEventListener("scroll", syncScrollChrome, { passive: true });
