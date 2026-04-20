@@ -2095,10 +2095,11 @@ function shouldTriggerAssistantWebResearch(question, response) {
   if (!isAssistantWebModeEnabled()) return false;
   const q = normalizeText(question);
   const intent = response?.meta?.lastIntent || "";
-  if (/(greeting|identity|company-contact|contact|cart|showcase)/.test(intent)) return false;
+  if (/(greeting|identity|company|company-strengths|company-contact|contact|cart|showcase|catalog|products|brands|category|microcategory|sector|certification|certifications|consultative-advice|consultative-follow-up|fallback)/.test(intent)) {
+    return false;
+  }
   if (intent === "web-search") return true;
-  if (q.split(" ").length >= 5) return true;
-  return /(brand|marchio|marca|attrezz|attrezzi|attrezzature|strument|equip|scheda tecnica|manuale|catalogo brand|produttore|modello|certificazione|atex|anticaduta|guanti|maschera|imbracatura|rilevatore|calzature)/.test(q);
+  return /(cerca sul web|cerca online|fai una ricerca|cerca su internet|approfondisci sul web|verifica online|trova online)/.test(q);
 }
 
 async function performAssistantWebResearch(question) {
@@ -2490,6 +2491,8 @@ function answerAssistantQuestion(question) {
   const isFollowUpQuestion =
     q.split(" ").length <= 7 ||
     /(e per|e invece|approfondisci|spiegami meglio|piu nel dettaglio|continua|quali prodotti|quale categoria|da dove parto|cosa mi consigli)/.test(q);
+  const wantsExplicitWebResearch =
+    /(cerca sul web|cerca online|fai una ricerca|cerca su internet|approfondisci sul web|verifica online|trova online)/.test(q);
   const buildReferenceLine = (references = []) =>
     references?.length ? ` Mi sto basando su riferimenti come ${references.join(", ")}.` : "";
 
@@ -2605,7 +2608,7 @@ function answerAssistantQuestion(question) {
     }
   }
 
-  if (/(chi e zenit|chi siete|parlami di zenit|cosa fate|presentami zenit|azienda|dimmi chi e zenit|raccontami zenit|cosa fa zenit|cos e zenit)/.test(q)) {
+  if (/(chi e zenit|chi siete|parlami di zenit|cosa fate|presentami zenit|dimmi chi e zenit|raccontami zenit|cosa fa zenit|cos e zenit)/.test(q)) {
     return {
       text: `${knowledge.company.summary} ${knowledge.company.experience} Lavora soprattutto con ${knowledge.company.sectorsServed.join(", ")}. Le aree principali che presidia sono ${knowledge.company.productFamilies.slice(0, 6).join(", ")}. Il tratto distintivo di Zenit e questo: ${knowledge.company.valueProposition} Se vuoi, posso anche presentartela in modo piu commerciale, piu istituzionale oppure piu tecnico.`,
       action: null,
@@ -2848,7 +2851,10 @@ function answerAssistantQuestion(question) {
   }
 
   if (matchingProducts.length) {
-    const topProducts = matchingProducts.slice(0, 3).map((product) => product.name).join(", ");
+    const topProducts = matchingProducts
+      .slice(0, 3)
+      .map((product) => `${product.name}${product.brand ? ` (${product.brand})` : ""}`)
+      .join(", ");
     return {
       text: `Ho trovato questi prodotti pertinenti nel sito: ${topProducts}. ${
         currentPage === "catalog"
@@ -2908,16 +2914,16 @@ function answerAssistantQuestion(question) {
     };
   }
 
-  if (isAssistantWebModeEnabled()) {
+  if (wantsExplicitWebResearch && isAssistantWebModeEnabled()) {
     return {
-      text: "Nella conoscenza interna di Zenit non ho trovato una risposta abbastanza solida. Avvio una ricerca web integrata dentro Carlo 2.0, senza farti uscire dal sito.",
+      text: "Non trovo abbastanza elementi nella base interna di Zenit. Avvio una ricerca web integrata e ti rispondo qui dentro, senza farti uscire dal sito.",
       action: null,
       meta: { lastIntent: "web-search", lastQuestion: question, webResearchQuery: question }
     };
   }
 
   return {
-    text: "Posso aiutarti meglio se mi scrivi settore, categoria, microcategoria, certificazione, brand o obiettivo. Possiamo parlare anche per passaggi, come in una vera chat: ad esempio 'lavoro nel petrolchimico', poi 'quali categorie guardo?', poi 'approfondisci ATEX'.",
+    text: "Su questa richiesta non ho ancora un aggancio abbastanza chiaro. Scrivimi in modo piu diretto una di queste cose: settore, categoria, microcategoria, brand, certificazione oppure prodotto che stai cercando.",
     action: null,
     meta: { lastIntent: "fallback", lastQuestion: question, lastNeedProfile: needProfile }
   };
@@ -3261,7 +3267,10 @@ assistantForm?.addEventListener("submit", async (event) => {
     ...(response.meta || {})
   });
 
-  if (response?.meta?.webResearchQuery || shouldTriggerAssistantWebResearch(question, response)) {
+  const shouldRunIntegratedResearch =
+    Boolean(response?.meta?.webResearchQuery) || shouldTriggerAssistantWebResearch(question, response);
+
+  if (shouldRunIntegratedResearch) {
     const researchThinkingMessage = appendThinkingMessage();
     await wait(getAssistantThinkingDelay(question, "research"));
     try {
@@ -3281,7 +3290,7 @@ assistantForm?.addEventListener("submit", async (event) => {
     }
   }
 
-  if (typeof response.action === "function") {
+  if (!shouldRunIntegratedResearch && typeof response.action === "function") {
     window.setTimeout(() => {
       response.action();
     }, isAssistantWebModeEnabled() ? 120 : 260);
