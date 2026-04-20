@@ -443,6 +443,22 @@ function createBrandPlaceholder(name = "Brand") {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+function isRenderableImageSource(value) {
+  const src = String(value || "").trim();
+  if (!src) return false;
+  if (/^data:image\//i.test(src)) return true;
+  if (/^https?:\/\//i.test(src)) return true;
+  if (/^\//.test(src)) return true;
+  if (/^[a-z0-9][a-z0-9/_\-.]+\.(png|jpe?g|webp|gif|svg)$/i.test(src)) return true;
+  if (/^[a-z]:\\/i.test(src) || /^file:\/\//i.test(src)) return false;
+  return false;
+}
+
+function getProductImageSource(product) {
+  const image = String(product?.image || "").trim();
+  return isRenderableImageSource(image) ? image : createPlaceholderImage(product?.name || "Zenit");
+}
+
 function getCategories() {
   return ["Tutti", ...new Set(products.map((product) => product.category).filter(Boolean))];
 }
@@ -659,8 +675,12 @@ function openProductInfoModal(productId) {
   const price = modal.querySelector("#product-info-price");
 
   if (image) {
-    image.src = product.image || createPlaceholderImage(product.name);
+    image.src = getProductImageSource(product);
     image.alt = product.name;
+    image.onerror = () => {
+      image.onerror = null;
+      image.src = createPlaceholderImage(product.name);
+    };
   }
 
   if (eyebrow) {
@@ -809,7 +829,7 @@ function renderProducts() {
               .slice(1, 3)
               .map((tag) => `<span>${tag}</span>`)
               .join("")}</div>
-            <img src="${product.image}" alt="${product.name}" loading="lazy" />
+            <img src="${getProductImageSource(product)}" alt="${product.name}" loading="lazy" data-product-name="${product.name}" />
           </div>
           <span class="product-brand">${product.brand || "ZENIT"}</span>
           <h3>${product.name}</h3>
@@ -824,6 +844,16 @@ function renderProducts() {
       `
     )
     .join("");
+
+  productGrid.querySelectorAll(".product-card__image img").forEach((image) => {
+    image.addEventListener(
+      "error",
+      () => {
+        image.src = createPlaceholderImage(image.dataset.productName || "Zenit");
+      },
+      { once: true }
+    );
+  });
 }
 
 function renderAdminList() {
@@ -1437,7 +1467,7 @@ async function handleAdminSubmit(event) {
     description,
     tags,
     price,
-    image: image || createPlaceholderImage(name),
+    image: isRenderableImageSource(image) ? image : createPlaceholderImage(name),
     showcase
   });
 
