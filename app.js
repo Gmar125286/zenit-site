@@ -33,6 +33,8 @@ const heroProductImage = document.querySelector("#hero-product-image");
 const heroProductName = document.querySelector("#hero-product-name");
 const heroProductSubtitle = document.querySelector("#hero-product-subtitle");
 const heroProductMeta = document.querySelector("#hero-product-meta");
+let heroCatalogRotationIndex = 0;
+let heroCatalogRotationTimer = null;
 const adminForm = document.querySelector("#admin-form");
 const brandForm = document.querySelector("#brand-form");
 const adminProductList = document.querySelector("#admin-product-list");
@@ -869,6 +871,9 @@ function renderHeroCatalogPreview() {
   const showcaseProducts = getHomepageProducts();
   const totalPublished = products.length;
   const featuredProduct = showcaseProducts[0] || products[0] || null;
+  const rotationProducts = showcaseProducts.length ? showcaseProducts : products;
+
+  stopHeroCatalogRotation();
 
   if (heroProductCount) {
     heroProductCount.textContent = String(totalPublished);
@@ -916,6 +921,98 @@ function renderHeroCatalogPreview() {
       featuredProduct.subcategory ||
       featuredProduct.description ||
       "Prodotto disponibile nel catalogo dinamico Zenit.";
+  }
+}
+
+function stopHeroCatalogRotation() {
+  if (!heroCatalogRotationTimer) return;
+  window.clearInterval(heroCatalogRotationTimer);
+  heroCatalogRotationTimer = null;
+}
+
+function applyHeroCatalogProduct(featuredProduct, totalPublished) {
+  if (!featuredProduct || !heroCatalogProduct) return;
+
+  if (heroProductCountInline) {
+    heroProductCountInline.textContent = String(totalPublished);
+  }
+
+  if (heroProductImage) {
+    heroProductImage.src = getProductImageSource(featuredProduct);
+    heroProductImage.alt = featuredProduct.name || "Prodotto Zenit";
+    heroProductImage.onerror = () => {
+      heroProductImage.onerror = null;
+      heroProductImage.src = createPlaceholderImage(featuredProduct.name);
+    };
+  }
+
+  if (heroProductMeta) {
+    heroProductMeta.textContent = [featuredProduct.brand || "Zenit", featuredProduct.category || "Catalogo"]
+      .filter(Boolean)
+      .join(" • ");
+  }
+
+  if (heroProductName) {
+    heroProductName.textContent = featuredProduct.name || "Prodotto in evidenza";
+  }
+
+  if (heroProductSubtitle) {
+    heroProductSubtitle.textContent =
+      featuredProduct.subtitle ||
+      featuredProduct.subcategory ||
+      featuredProduct.description ||
+      "Prodotto disponibile nel catalogo dinamico Zenit.";
+  }
+}
+
+function rotateHeroCatalogProduct(showcaseProducts, totalPublished) {
+  if (!heroCatalogProduct || showcaseProducts.length <= 1) return;
+  heroCatalogRotationIndex = (heroCatalogRotationIndex + 1) % showcaseProducts.length;
+  heroCatalogProduct.classList.add("is-rotating");
+
+  window.setTimeout(() => {
+    applyHeroCatalogProduct(showcaseProducts[heroCatalogRotationIndex], totalPublished);
+    heroCatalogProduct.classList.remove("is-rotating");
+  }, 220);
+}
+
+function renderHeroCatalogPreview() {
+  if (!heroProductCount && !heroCatalogProduct) return;
+
+  const showcaseProducts = getHomepageProducts();
+  const totalPublished = products.length;
+  const featuredProduct = showcaseProducts[0] || products[0] || null;
+  const rotationProducts = showcaseProducts.length ? showcaseProducts : products;
+
+  stopHeroCatalogRotation();
+
+  if (heroProductCount) {
+    heroProductCount.textContent = String(totalPublished);
+  }
+
+  if (heroProductCountInline) {
+    heroProductCountInline.textContent = String(totalPublished);
+  }
+
+  if (!heroCatalogEmpty || !heroCatalogProduct || !featuredProduct) {
+    if (heroCatalogEmpty) {
+      heroCatalogEmpty.hidden = false;
+    }
+    if (heroCatalogProduct) {
+      heroCatalogProduct.hidden = true;
+    }
+    return;
+  }
+
+  heroCatalogEmpty.hidden = true;
+  heroCatalogProduct.hidden = false;
+  heroCatalogRotationIndex = Math.min(heroCatalogRotationIndex, Math.max(rotationProducts.length - 1, 0));
+  applyHeroCatalogProduct(rotationProducts[heroCatalogRotationIndex] || featuredProduct, totalPublished);
+
+  if (rotationProducts.length > 1) {
+    heroCatalogRotationTimer = window.setInterval(() => {
+      rotateHeroCatalogProduct(rotationProducts, totalPublished);
+    }, 3600);
   }
 }
 
