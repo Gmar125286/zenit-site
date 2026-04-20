@@ -142,9 +142,8 @@ img {
   transition:
     opacity 220ms ease,
     transform 220ms ease,
-    min-width 220ms ease,
-    width 220ms ease,
-    margin 220ms ease;
+    filter 220ms ease;
+  will-change: transform, opacity;
 }
 
 .logo-image {
@@ -169,15 +168,11 @@ img {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.045);
   transition:
     opacity 220ms ease,
-    max-width 220ms ease,
-    min-width 220ms ease,
-    padding 220ms ease,
-    margin 220ms ease,
-    border-width 220ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
   overflow: hidden;
+  will-change: transform, opacity;
 }
 
 .search-shell:focus-within {
@@ -205,25 +200,16 @@ img {
 }
 
 .main-header.is-retracted .logo-block {
-  width: 0;
-  min-width: 0;
-  margin: 0;
   opacity: 0;
-  transform: translateY(-12px) scale(0.96);
+  transform: translateY(-12px);
+  filter: blur(3px);
   pointer-events: none;
 }
 
 .main-header.is-retracted .search-shell {
-  flex: 0 1 0;
-  width: 0;
-  max-width: 0;
-  min-width: 0;
-  padding: 0;
-  margin: 0;
-  border-width: 0;
   opacity: 0;
   transform: translateY(-12px);
-  box-shadow: none;
+  filter: blur(3px);
   pointer-events: none;
 }
 
