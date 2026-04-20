@@ -508,10 +508,10 @@
             <div>
               <p class="section-kicker">Vetrina</p>
               <h2>Prodotti in evidenza</h2>
-              <p>In homepage compaiono solo i prodotti selezionati come vetrina. L'intero assortimento vive nel catalogo completo.</p>
+              <p>In homepage compaiono solo le foto dei prodotti selezionati come vetrina. L'intero assortimento vive nel catalogo completo.</p>
             </div>
           </div>
-          <div class="product-grid" id="product-grid" aria-live="polite"></div>
+          <div class="showcase-gallery" id="product-grid" aria-live="polite"></div>
           <div class="featured-cta">
             <a class="primary-button large" href="catalogo.html">Vai al catalogo completo</a>
           </div>
@@ -668,19 +668,23 @@
                     <label for="admin-image">URL immagine</label>
                     <input id="admin-image" name="image" type="url" placeholder="https://..." />
                   </div>
-                  <div class="form-field full-span">
-                    <label for="admin-image-file">Oppure carica immagine</label>
-                    <input id="admin-image-file" name="imageFile" type="file" accept="image/*" />
-                  </div>
-                  <label class="admin-checkbox full-span" for="admin-showcase">
-                    <input id="admin-showcase" name="showcase" type="checkbox" checked />
-                    <span>Mostra questo prodotto nella vetrina della homepage</span>
-                  </label>
-                  <div class="admin-form__footer full-span">
-                    <p>I prodotti vengono salvati nel browser. Puoi decidere se mostrarli solo nel catalogo completo oppure anche nella vetrina della home.</p>
-                    <button class="primary-button" type="submit">Aggiungi prodotto</button>
-                  </div>
-                </form>
+                    <div class="form-field full-span">
+                      <label for="admin-image-file">Oppure carica immagine</label>
+                      <input id="admin-image-file" name="imageFile" type="file" accept="image/*" />
+                    </div>
+                    <div class="form-field full-span">
+                      <label for="admin-documents-file">PDF documenti e schede tecniche</label>
+                      <input id="admin-documents-file" name="documentsFile" type="file" accept="application/pdf,.pdf" multiple />
+                    </div>
+                    <label class="admin-checkbox full-span" for="admin-showcase">
+                      <input id="admin-showcase" name="showcase" type="checkbox" checked />
+                      <span>Mostra la foto di questo prodotto nella vetrina homepage</span>
+                    </label>
+                    <div class="admin-form__footer full-span">
+                      <p>I prodotti vengono salvati nel database del sito con immagini e PDF scaricabili nella scheda info prodotto. Puoi decidere se mostrarli solo nel catalogo completo oppure anche nella vetrina fotografica della home.</p>
+                      <button class="primary-button" type="submit">Aggiungi prodotto</button>
+                    </div>
+                  </form>
 
                 <div class="admin-list-card">
                   <div class="admin-list-card__head">
@@ -706,7 +710,7 @@
                     <input id="brand-website" name="brandWebsite" type="url" placeholder="https://www.brand.com" />
                   </div>
                   <div class="form-field full-span">
-                    <label for="brand-notes">Note conoscitive per Carlo 2.0</label>
+                    <label for="brand-notes">Note conoscitive brand</label>
                     <textarea
                       id="brand-notes"
                       name="brandNotes"
@@ -780,49 +784,6 @@
       <div class="cart-summary">
         <div><span>Totale</span><strong id="cart-total">&euro;0,00</strong></div>
         <button class="primary-button full-width" id="cart-checkout-button" type="button">Procedi con la richiesta ordine</button>
-      </div>
-    </aside>
-
-    <aside class="assistant-widget" id="assistant-widget" aria-live="polite">
-      <button class="assistant-toggle" id="assistant-toggle" type="button" aria-expanded="false" aria-controls="assistant-panel">
-        <span class="assistant-toggle__dot"></span>
-        <span class="assistant-toggle__label">Carlo 2.0</span>
-      </button>
-      <div class="assistant-panel" id="assistant-panel" hidden>
-        <div class="assistant-panel__header">
-          <div class="assistant-identity">
-            <span class="assistant-avatar" aria-hidden="true">
-              <span></span>
-            </span>
-            <div>
-            <p class="section-kicker">Supporto virtuale</p>
-            <h3>Carlo 2.0, AI dedicata ai settori Zenit</h3>
-              <p class="assistant-subtitle">Consulente virtuale per chimico, petrolchimico, edile, navale, energetico, automotive e servizi.</p>
-            </div>
-          </div>
-          <button class="assistant-close" id="assistant-close" type="button" aria-label="Chiudi assistente">&times;</button>
-        </div>
-        <div class="assistant-statusbar">
-          <span class="assistant-status-pill assistant-status-pill--online">Online</span>
-          <span class="assistant-status-pill" id="assistant-status-copy">AI settoriale Zenit attiva</span>
-        </div>
-        <div class="assistant-messages" id="assistant-messages">
-          <article class="assistant-message assistant-message--bot">
-            <strong>Carlo 2.0</strong>
-            <p>Ciao, dimmi pure di cosa hai bisogno.</p>
-          </article>
-        </div>
-        <form class="assistant-form" id="assistant-form">
-          <input
-            id="assistant-input"
-            name="assistantQuestion"
-            type="text"
-            placeholder="Scrivi una domanda, ad esempio: lavoro nel petrolchimico, cosa mi consigli?"
-            autocomplete="off"
-          />
-          <button type="submit" class="primary-button">Invia</button>
-        </form>
-        <div class="assistant-admin" id="assistant-admin-panel" hidden></div>
       </div>
     </aside>
 

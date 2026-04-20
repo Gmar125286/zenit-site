@@ -111,6 +111,7 @@ let adminAuthenticated = false;
 let backendReady = false;
 let editingProductId = null;
 let editingBrandId = null;
+let homepageShowcaseRotationTimer = null;
 let assistantConversationState = {
   lastIntent: null,
   lastSector: null,
@@ -147,6 +148,14 @@ function normalizeProduct(product) {
     subtitle: String(product.subtitle || "").trim(),
     description: String(product.description || "").trim(),
     tags: Array.isArray(product.tags) ? product.tags.filter(Boolean) : [],
+    documents: Array.isArray(product.documents)
+      ? product.documents
+          .map((document) => ({
+            name: String(document?.name || "").trim(),
+            url: String(document?.url || "").trim()
+          }))
+          .filter((document) => document.name && document.url)
+      : [],
     showcase: Boolean(product.showcase)
   };
 }
@@ -342,7 +351,6 @@ function applyServerState(payload = {}) {
   adminAuthenticated = Boolean(payload.isAdmin);
   renderUserSession();
   refreshAll();
-  syncAssistantAdminState();
 }
 
 async function bootstrapApp() {
@@ -537,7 +545,7 @@ function resetProductFormState() {
   }
   if (adminProductFormStatus) {
     adminProductFormStatus.textContent =
-      "I prodotti vengono salvati nel database del sito e restano disponibili anche dopo il riavvio.";
+      "I prodotti vengono salvati nel database del sito e possono apparire anche nella vetrina fotografica della homepage.";
   }
   const showcaseField = document.querySelector("#admin-showcase");
   if (showcaseField) {
@@ -565,9 +573,10 @@ function startProductEdit(id) {
   setValue("#admin-subtitle", product.subtitle);
   setValue("#admin-price", product.price);
   setValue("#admin-tags", Array.isArray(product.tags) ? product.tags.join(", ") : "");
-  setValue("#admin-description", product.description);
-  setValue("#admin-image", product.image);
-  setValue("#admin-image-file", "");
+    setValue("#admin-description", product.description);
+    setValue("#admin-image", product.image);
+    setValue("#admin-image-file", "");
+    setValue("#admin-documents-file", "");
 
   if (adminCategorySelect) {
     adminCategorySelect.value = product.category || "";
@@ -587,7 +596,7 @@ function startProductEdit(id) {
   }
   if (adminProductFormStatus) {
     adminProductFormStatus.textContent =
-      "Stai modificando un prodotto gia presente nel catalogo. Salvando, il catalogo viene aggiornato mantenendo lo stesso prodotto.";
+      "Stai modificando un prodotto gia presente nel catalogo. Salvando, il catalogo e la vetrina fotografica vengono aggiornati mantenendo lo stesso prodotto.";
   }
 
   adminForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -595,6 +604,71 @@ function startProductEdit(id) {
 
 function getHomepageProducts() {
   return products.filter((product) => product.showcase);
+}
+
+function stopHomepageShowcaseRotation() {
+  if (!homepageShowcaseRotationTimer) return;
+  window.clearInterval(homepageShowcaseRotationTimer);
+  homepageShowcaseRotationTimer = null;
+}
+
+function activateHomepageShowcaseSlide(index) {
+  if (!productGrid) return;
+  const slides = Array.from(productGrid.querySelectorAll(".showcase-gallery__slide"));
+  if (!slides.length) return;
+
+  const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+  slides.forEach((slide, slideIndex) => {
+    slide.classList.toggle("is-active", slideIndex === safeIndex);
+  });
+}
+
+function renderHomepageShowcase(visibleProducts) {
+  if (!productGrid) return;
+
+  stopHomepageShowcaseRotation();
+
+  if (!visibleProducts.length) {
+    productGrid.innerHTML = `
+      <article class="empty-state empty-state--wide">
+        <h3>Nessun prodotto in vetrina</h3>
+        <p>Seleziona nell'admin i prodotti che vuoi mostrare nella vetrina fotografica della homepage.</p>
+      </article>
+    `;
+    return;
+  }
+
+  productGrid.innerHTML = `
+    <div class="showcase-gallery__viewport">
+      ${visibleProducts
+        .map(
+          (product, index) => `
+            <article class="showcase-gallery__slide ${index === 0 ? "is-active" : ""}" aria-label="${product.name}">
+              <img src="${getProductImageSource(product)}" alt="${product.name}" loading="lazy" data-product-name="${product.name}" />
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+
+  productGrid.querySelectorAll(".showcase-gallery__slide img").forEach((image) => {
+    image.addEventListener(
+      "error",
+      () => {
+        image.src = createPlaceholderImage(image.dataset.productName || "Zenit");
+      },
+      { once: true }
+    );
+  });
+
+  if (visibleProducts.length <= 1) return;
+
+  let activeIndex = 0;
+  homepageShowcaseRotationTimer = window.setInterval(() => {
+    activeIndex = (activeIndex + 1) % visibleProducts.length;
+    activateHomepageShowcaseSlide(activeIndex);
+  }, 3200);
 }
 
 function filteredProducts(sourceProducts = products) {
@@ -636,6 +710,10 @@ function ensureProductInfoModal() {
         <div class="product-info-modal__meta" id="product-info-meta"></div>
         <p class="product-info-modal__description" id="product-info-description"></p>
         <div class="product-info-modal__tags" id="product-info-tags"></div>
+        <div class="product-info-modal__downloads" id="product-info-downloads" hidden>
+          <strong>Documenti scaricabili</strong>
+          <div class="product-info-modal__downloads-list" id="product-info-downloads-list"></div>
+        </div>
         <div class="product-info-modal__footer">
           <strong id="product-info-price"></strong>
           <button class="primary-button" type="button" id="product-info-add-to-cart">Aggiungi al carrello</button>
@@ -684,6 +762,8 @@ function openProductInfoModal(productId) {
   const meta = modal.querySelector("#product-info-meta");
   const description = modal.querySelector("#product-info-description");
   const tags = modal.querySelector("#product-info-tags");
+  const downloads = modal.querySelector("#product-info-downloads");
+  const downloadsList = modal.querySelector("#product-info-downloads-list");
   const price = modal.querySelector("#product-info-price");
 
   if (image) {
@@ -725,6 +805,31 @@ function openProductInfoModal(productId) {
     tags.innerHTML = Array.isArray(product.tags) && product.tags.length
       ? product.tags.map((tag) => `<span>${tag}</span>`).join("")
       : "<span>Catalogo Zenit</span>";
+  }
+
+  if (downloads && downloadsList) {
+    const documents = Array.isArray(product.documents) ? product.documents.filter((document) => document?.url) : [];
+    if (documents.length) {
+      downloads.hidden = false;
+      downloadsList.innerHTML = documents
+        .map(
+          (document, index) => `
+            <a
+              class="product-info-modal__download"
+              href="${document.url}"
+              download="${document.name || `documento-${index + 1}.pdf`}"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ${document.name || `Documento ${index + 1}`}
+            </a>
+          `
+        )
+        .join("");
+    } else {
+      downloads.hidden = true;
+      downloadsList.innerHTML = "";
+    }
   }
 
   if (price) {
@@ -805,6 +910,11 @@ function renderProducts() {
 
   const sourceProducts = currentPage === "catalog" ? products : getHomepageProducts();
   const visibleProducts = filteredProducts(sourceProducts);
+
+  if (currentPage !== "catalog") {
+    renderHomepageShowcase(visibleProducts);
+    return;
+  }
 
   if (heroProductCount) {
     heroProductCount.textContent = String(products.length);
@@ -1041,12 +1151,12 @@ function renderAdminList() {
           <div class="admin-product-row__copy">
             <strong>${product.name}</strong>
             <p>${product.brand || "Brand"} • ${product.category || "Categoria"} • ${formatPrice(product.price || 0)}</p>
-            <span class="admin-product-row__meta">${product.showcase ? "In vetrina home" : "Solo catalogo completo"}</span>
+            <span class="admin-product-row__meta">${product.showcase ? "In vetrina fotografica home" : "Solo catalogo completo"}</span>
           </div>
           <div class="admin-product-row__actions">
             <button class="ghost-button" type="button" data-edit-product="${product.id}">Modifica</button>
             <button class="ghost-button admin-toggle" type="button" data-toggle-showcase="${product.id}">
-              ${product.showcase ? "Rimuovi vetrina" : "Metti in vetrina"}
+              ${product.showcase ? "Rimuovi dalla vetrina" : "Metti in vetrina"}
             </button>
             <button class="ghost-button admin-delete" type="button" data-delete="${product.id}">Elimina</button>
           </div>
@@ -1105,7 +1215,7 @@ function renderAdminBrands() {
             ${
               brand.notes
                 ? `<span class="admin-brand-row__notes">${brand.notes}</span>`
-                : `<span class="admin-brand-row__notes">Nessuna nota conoscitiva salvata per Carlo 2.0.</span>`
+                : `<span class="admin-brand-row__notes">Nessuna nota conoscitiva automatica salvata per questo brand.</span>`
             }
           </div>
           <div class="admin-brand-row__actions">
@@ -1443,10 +1553,10 @@ function syncBrandKnowledgePreview() {
   if (!brandKnowledgePreview) return;
   if (!brands.length) {
     brandKnowledgePreview.value =
-      "Quando salvi un brand, Carlo 2.0 prova ad apprendere automaticamente dal sito ufficiale e dall'email aziendale collegata.";
+      "Quando salvi un brand, il sito prova a leggere automaticamente dal sito ufficiale e dall'email aziendale collegata.";
     return;
   }
-  brandKnowledgePreview.value = brands[0]?.notes || "Brand salvato, ma Carlo 2.0 non ha ancora trovato abbastanza segnali automatici.";
+  brandKnowledgePreview.value = brands[0]?.notes || "Brand salvato, ma non sono ancora stati trovati abbastanza segnali automatici.";
 }
 
 function resetBrandFormState() {
@@ -1462,7 +1572,7 @@ function resetBrandFormState() {
   }
   if (brandFormStatus) {
     brandFormStatus.textContent =
-      "I brand aggiunti qui scorrono nella fascia partner del sito e fanno apprendere automaticamente Carlo 2.0 dal dominio aziendale collegato.";
+      "I brand aggiunti qui scorrono nella fascia partner del sito e aggiornano automaticamente le note conoscitive dal dominio aziendale collegato.";
   }
 }
 
@@ -1501,7 +1611,7 @@ function startBrandEdit(id) {
   }
   if (brandFormStatus) {
     brandFormStatus.textContent =
-      "Stai modificando un brand esistente. Salvando, Carlo 2.0 ricalcola automaticamente le informazioni dal sito e dall'email collegata.";
+      "Stai modificando un brand esistente. Salvando, il sito ricalcola automaticamente le informazioni dal sito e dall'email collegata.";
   }
   brandForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -1514,7 +1624,6 @@ function syncAdminView() {
   if (adminProtected) {
     adminProtected.hidden = !isOpen;
   }
-  syncAssistantAdminState();
 }
 
 function setAdminLoginFeedback(message, isError = false) {
@@ -1598,14 +1707,30 @@ function readFileAsDataUrl(file) {
   });
 }
 
+async function readDocumentsAsEntries(files) {
+  const entries = await Promise.all(
+    files.map(async (file) => ({
+      name: String(file.name || "documento.pdf").trim(),
+      url: await readFileAsDataUrl(file)
+    }))
+  );
+  return entries.filter((entry) => entry.name && entry.url);
+}
+
 async function handleAdminSubmit(event) {
   event.preventDefault();
   const formData = new FormData(adminForm);
   const file = formData.get("imageFile");
+  const existingProduct = editingProductId ? getProductById(editingProductId) : null;
+  const documentFiles = formData
+    .getAll("documentsFile")
+    .filter((entry) => entry instanceof File && entry.size > 0 && /\.pdf$/i.test(entry.name || ""));
   let image = String(formData.get("image") || "").trim();
 
   if (file && file.size) {
     image = await readFileAsDataUrl(file);
+  } else if (!image && existingProduct?.image) {
+    image = existingProduct.image;
   }
 
   const name = String(formData.get("name") || "").trim();
@@ -1620,6 +1745,7 @@ async function handleAdminSubmit(event) {
     .filter(Boolean);
   const price = Number(formData.get("price") || 0);
   const showcase = formData.get("showcase") === "on";
+  const documents = documentFiles.length ? await readDocumentsAsEntries(documentFiles) : existingProduct?.documents || [];
 
   const product = normalizeProduct({
     id: editingProductId || `${slugify(name)}-${Date.now()}`,
@@ -1630,6 +1756,7 @@ async function handleAdminSubmit(event) {
     subtitle,
     description,
     tags,
+    documents,
     price,
     image: isRenderableImageSource(image) ? image : createPlaceholderImage(name),
     showcase
@@ -3184,79 +3311,6 @@ openCartLinks.forEach((link) => {
   });
 });
 
-assistantToggle?.addEventListener("click", () => {
-  setAssistantOpen(assistantPanel?.hidden ?? true);
-});
-
-assistantClose?.addEventListener("click", () => {
-  setAssistantOpen(false);
-});
-
-assistantInput?.addEventListener("focus", () => {
-  if (assistantPanel?.hidden) return;
-  syncAssistantViewportMetrics();
-  window.setTimeout(() => {
-    assistantInput?.scrollIntoView({ block: "nearest" });
-    assistantMessages?.scrollTo({ top: assistantMessages.scrollHeight, behavior: "smooth" });
-  }, 220);
-});
-
-assistantSuggestions?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-assistant-action]");
-  if (!button) return;
-  handleAssistantAction(button.dataset.assistantAction);
-});
-
-assistantWebModeToggle?.addEventListener("change", (event) => {
-  event.target.checked = true;
-  setAssistantWebModeEnabled(true);
-});
-
-assistantForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const question = assistantInput?.value.trim() || "";
-  if (!question) return;
-
-  appendAssistantMessage("user", question);
-  assistantInput.value = "";
-  assistantInput.blur();
-
-  const thinkingMessage = appendThinkingMessage();
-  await wait(getAssistantThinkingDelay(question, "primary"));
-  thinkingMessage?.remove();
-
-  const response = answerAssistantQuestion(question);
-  appendAssistantMessage("bot", response.text);
-  updateAssistantConversationState({
-    lastQuestion: question,
-    ...(response.meta || {})
-  });
-
-  const shouldRunIntegratedResearch =
-    Boolean(response?.meta?.webResearchQuery) || shouldTriggerAssistantWebResearch(question, response);
-
-  if (shouldRunIntegratedResearch) {
-    const researchThinkingMessage = appendThinkingMessage();
-    await wait(getAssistantThinkingDelay(question, "research"));
-    try {
-      const research = await performAssistantWebResearch(response?.meta?.webResearchQuery || question);
-      researchThinkingMessage?.remove();
-      appendAssistantMessage("bot", research.text, { sources: research.sources, extraClassName: "assistant-message--research" });
-      updateAssistantConversationState({
-        lastIntent: "web-research-result",
-        lastQuestion: question
-      });
-    } catch (error) {
-      researchThinkingMessage?.remove();
-      appendAssistantMessage(
-        "bot",
-        error.message || "Ho provato la ricerca integrata, ma in questo momento non riesco a completarla dal web."
-      );
-    }
-  }
-
-});
-
 if (heroSection) {
   heroSection.addEventListener("mousemove", (event) => {
     const rect = heroSection.getBoundingClientRect();
@@ -3313,15 +3367,11 @@ document.addEventListener("keydown", (event) => {
   });
   setCatalogNavOpen(false);
   toggleCart(false);
-  setAssistantOpen(false);
   closeProductInfoModal();
 });
 
 window.addEventListener("scroll", requestScrollChromeSync, { passive: true });
 window.addEventListener("resize", syncScrollChrome);
-window.addEventListener("resize", syncAssistantViewportMetrics);
-window.visualViewport?.addEventListener("resize", syncAssistantViewportMetrics);
-window.visualViewport?.addEventListener("scroll", syncAssistantViewportMetrics);
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver(
@@ -3355,13 +3405,10 @@ if ("IntersectionObserver" in window) {
 }
 
 syncScrollChrome();
-syncAssistantViewportMetrics();
-setAssistantOpen(getAssistantStoredOpenState());
 hydrateAdminCategorySelects();
 bootstrapApp().catch((error) => {
   console.error(error);
   notifyBackendUnavailable("admin-login");
   refreshAll();
-  syncAssistantAdminState();
   renderUserSession();
 });

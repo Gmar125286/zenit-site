@@ -70,6 +70,7 @@ def init_db() -> None:
             subtitle TEXT,
             description TEXT,
             tags_json TEXT NOT NULL DEFAULT '[]',
+            documents_json TEXT NOT NULL DEFAULT '[]',
             price REAL NOT NULL DEFAULT 0,
             image TEXT,
             showcase INTEGER NOT NULL DEFAULT 0,
@@ -114,6 +115,8 @@ def init_db() -> None:
     product_columns = {row["name"] for row in db.execute("PRAGMA table_info(products)").fetchall()}
     if "subcategory" not in product_columns:
         db.execute("ALTER TABLE products ADD COLUMN subcategory TEXT")
+    if "documents_json" not in product_columns:
+        db.execute("ALTER TABLE products ADD COLUMN documents_json TEXT NOT NULL DEFAULT '[]'")
     brand_columns = {row["name"] for row in db.execute("PRAGMA table_info(brands)").fetchall()}
     if "email" not in brand_columns:
         db.execute("ALTER TABLE brands ADD COLUMN email TEXT")
@@ -134,6 +137,7 @@ def row_to_product(row: sqlite3.Row) -> dict[str, Any]:
         "subtitle": row["subtitle"] or "",
         "description": row["description"] or "",
         "tags": json.loads(row["tags_json"] or "[]"),
+        "documents": json.loads(row["documents_json"] or "[]"),
         "price": row["price"] or 0,
         "image": row["image"] or "",
         "showcase": bool(row["showcase"]),
@@ -621,8 +625,8 @@ def api_migrate() -> Any:
         db.execute(
             """
             INSERT OR IGNORE INTO products
-            (id, name, category, subcategory, brand, subtitle, description, tags_json, price, image, showcase, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, name, category, subcategory, brand, subtitle, description, tags_json, documents_json, price, image, showcase, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 product.get("id"),
@@ -633,6 +637,7 @@ def api_migrate() -> Any:
                 product.get("subtitle") or "",
                 product.get("description") or "",
                 json.dumps(product.get("tags") or []),
+                json.dumps(product.get("documents") or []),
                 float(product.get("price") or 0),
                 product.get("image") or "",
                 1 if product.get("showcase") else 0,
@@ -777,8 +782,8 @@ def api_create_product() -> Any:
     payload = request.get_json(silent=True) or {}
     db.execute(
         """
-        INSERT INTO products (id, name, category, subcategory, brand, subtitle, description, tags_json, price, image, showcase, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO products (id, name, category, subcategory, brand, subtitle, description, tags_json, documents_json, price, image, showcase, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             payload.get("id"),
@@ -789,6 +794,7 @@ def api_create_product() -> Any:
             payload.get("subtitle") or "",
             payload.get("description") or "",
             json.dumps(payload.get("tags") or []),
+            json.dumps(payload.get("documents") or []),
             float(payload.get("price") or 0),
             payload.get("image") or "",
             1 if payload.get("showcase") else 0,
@@ -812,7 +818,7 @@ def api_update_product(product_id: str) -> Any:
     db.execute(
         """
         UPDATE products
-        SET name = ?, category = ?, subcategory = ?, brand = ?, subtitle = ?, description = ?, tags_json = ?, price = ?, image = ?, showcase = ?
+        SET name = ?, category = ?, subcategory = ?, brand = ?, subtitle = ?, description = ?, tags_json = ?, documents_json = ?, price = ?, image = ?, showcase = ?
         WHERE id = ?
         """,
         (
@@ -823,6 +829,7 @@ def api_update_product(product_id: str) -> Any:
             payload.get("subtitle") or "",
             payload.get("description") or "",
             json.dumps(payload.get("tags") or []),
+            json.dumps(payload.get("documents") or []),
             float(payload.get("price") or 0),
             payload.get("image") or "",
             1 if payload.get("showcase") else 0,
