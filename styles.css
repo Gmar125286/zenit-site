@@ -664,25 +664,19 @@ img {
   animation: shineSweep 5.4s ease-in-out infinite;
 }
 
-.highlight-card__placeholder strong {
-  font-size: 6rem;
-  line-height: 1;
-}
-
-.highlight-card__placeholder span {
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: #6a8f75;
-}
-
 .highlight-card__empty {
   min-height: 360px;
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 10px;
+  padding: 24px;
+}
+
+.highlight-card__empty img {
+  width: 100%;
+  max-width: 220px;
+  max-height: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 34px rgba(8, 41, 18, 0.12));
 }
 
 .highlight-card__product[hidden] {
@@ -750,29 +744,6 @@ img {
   margin: 0;
   color: #5f7a69;
   line-height: 1.5;
-}
-
-.highlight-card__count-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: fit-content;
-  padding: 12px 16px;
-  border-radius: 999px;
-  background: rgba(238, 247, 240, 0.98);
-  border: 1px solid rgba(207, 224, 212, 0.95);
-}
-
-.highlight-card__count-badge strong {
-  font-size: 1.3rem;
-  line-height: 1;
-  color: #0d7f39;
-}
-
-.highlight-card__count-badge span {
-  color: #547062;
-  letter-spacing: 0.12em;
-  font-size: 0.64rem;
 }
 
 .badge {
