@@ -4578,6 +4578,20 @@ body[data-page="home"] .admin-panel {
   .header-row {
     gap: 12px;
     padding: 12px 0;
+    transition:
+      gap 220ms ease,
+      padding 220ms ease;
+  }
+
+  .main-header.is-retracted {
+    border-bottom-color: transparent;
+    box-shadow: 0 8px 16px rgba(3, 28, 12, 0.03);
+  }
+
+  .main-header.is-retracted .header-row {
+    gap: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .main-header.is-retracted .logo-block {
@@ -4597,6 +4611,15 @@ body[data-page="home"] .admin-panel {
     opacity: 0;
     transform: translateY(-14px);
     pointer-events: none;
+  }
+
+  .main-header.is-retracted .header-cta {
+    max-height: 0;
+    margin: 0;
+    opacity: 0;
+    transform: translateY(-14px);
+    pointer-events: none;
+    overflow: hidden;
   }
 
   .logo-block {
@@ -4641,6 +4664,13 @@ body[data-page="home"] .admin-panel {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
+    max-height: 160px;
+    transition:
+      max-height 220ms ease,
+      opacity 220ms ease,
+      transform 220ms ease,
+      margin 220ms ease;
+    overflow: hidden;
   }
 
   .header-cta > a,
