@@ -1908,6 +1908,9 @@ function syncScrollChrome() {
   const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
   const progress = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0;
   const scrollDelta = scrollTop - lastScrollTop;
+  const isMobileViewport = window.innerWidth <= 760;
+  const retractThreshold = isMobileViewport ? 96 : 180;
+  const deltaThreshold = isMobileViewport ? 6 : 10;
 
   if (scrollProgressBar) {
     scrollProgressBar.style.width = `${progress}%`;
@@ -1918,9 +1921,9 @@ function syncScrollChrome() {
 
     if (scrollTop <= 32) {
       headerRetracted = false;
-    } else if (!headerRetracted && scrollDelta > 10 && scrollTop > 180) {
+    } else if (!headerRetracted && scrollDelta > deltaThreshold && scrollTop > retractThreshold) {
       headerRetracted = true;
-    } else if (headerRetracted && scrollDelta < -10) {
+    } else if (headerRetracted && scrollDelta < -deltaThreshold) {
       headerRetracted = false;
     }
 

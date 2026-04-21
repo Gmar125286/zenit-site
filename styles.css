@@ -4553,13 +4553,6 @@ body[data-page="home"] .admin-panel {
 }
 
 @media (max-width: 760px) {
-  .main-header.is-retracted .logo-block,
-  .main-header.is-retracted .search-shell {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-
   .container {
     width: min(calc(100% - 20px), var(--container));
   }
@@ -4587,9 +4580,34 @@ body[data-page="home"] .admin-panel {
     padding: 12px 0;
   }
 
+  .main-header.is-retracted .logo-block {
+    max-height: 0;
+    margin: 0;
+    opacity: 0;
+    transform: translateY(-14px);
+    pointer-events: none;
+  }
+
+  .main-header.is-retracted .search-shell {
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    opacity: 0;
+    transform: translateY(-14px);
+    pointer-events: none;
+  }
+
   .logo-block {
     min-width: 0;
     justify-content: center;
+    max-height: 84px;
+    transition:
+      max-height 220ms ease,
+      opacity 220ms ease,
+      transform 220ms ease,
+      margin 220ms ease;
   }
 
   .logo-image {
@@ -4601,6 +4619,16 @@ body[data-page="home"] .admin-panel {
     width: 100%;
     height: 52px;
     padding-inline: 12px;
+    max-height: 52px;
+    transition:
+      max-height 220ms ease,
+      opacity 220ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 220ms ease,
+      margin 220ms ease,
+      padding 220ms ease,
+      border-width 220ms ease;
   }
 
   .search-shell input {
@@ -4932,12 +4960,20 @@ body[data-page="home"] .admin-panel {
   }
 
   .header-row {
-    gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "logo cta"
+      "search search";
+    align-items: center;
+    gap: 10px 10px;
     padding: 8px 0;
   }
 
   .logo-block {
+    grid-area: logo;
     justify-content: flex-start;
+    align-self: start;
   }
 
   .logo-image {
@@ -4945,20 +4981,23 @@ body[data-page="home"] .admin-panel {
   }
 
   .search-shell {
-    order: 3;
+    grid-area: search;
     width: 100%;
     min-width: 0;
-    height: 46px;
-    padding: 0 12px;
-    border-radius: 16px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+    height: 42px;
+    max-height: 42px;
+    padding: 0 10px;
+    border-radius: 14px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.035);
+    align-self: center;
   }
 
   .search-shell input {
-    font-size: 0.92rem;
+    font-size: 0.86rem;
   }
 
   .header-cta {
+    grid-area: cta;
     width: 100%;
     display: grid;
     grid-template-columns: auto auto;
@@ -4983,7 +5022,7 @@ body[data-page="home"] .admin-panel {
   .header-cta .ghost-button {
     grid-area: admin;
     min-height: 38px;
-    padding: 9px 12px;
+    padding: 8px 12px;
     border-radius: 12px;
     font-size: 0.84rem;
     line-height: 1;
@@ -5006,7 +5045,7 @@ body[data-page="home"] .admin-panel {
   .user-session .ghost-button,
   .user-session__badge {
     min-height: 38px;
-    padding: 9px 12px;
+    padding: 8px 12px;
     border-radius: 12px;
     font-size: 0.82rem;
     white-space: nowrap;
@@ -5617,8 +5656,9 @@ body[data-page="home"] .admin-panel {
   }
 
   .search-shell {
-    height: 44px;
-    padding: 0 10px;
+    height: 40px;
+    max-height: 40px;
+    padding: 0 9px;
   }
 
   .header-cta {
